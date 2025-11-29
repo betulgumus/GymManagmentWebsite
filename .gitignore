@@ -1,0 +1,11 @@
+.vs/
+*.vsidx
+*.suo
+*.user
+bin/
+obj/
+*.swp
+*.*~
+project.lock.json
+.DS_Store
+*.pyc
