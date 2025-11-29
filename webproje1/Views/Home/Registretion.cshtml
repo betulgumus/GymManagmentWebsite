@@ -1,0 +1,535 @@
+﻿@model ApplicationUser
+
+@{
+    ViewData["Title"] = "Üye Ol";
+    Layout = "_LayoutHomePage";
+}
+
+<style>
+    .register-section {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 100px 0 50px;
+    }
+
+    .register-container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        max-width: 1000px;
+        width: 100%;
+        margin: 20px;
+    }
+
+    .register-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--success-color));
+        color: white;
+        padding: 40px;
+        text-align: center;
+    }
+
+    .register-header h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .register-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .register-body {
+        padding: 40px;
+    }
+
+    .form-floating {
+        margin-bottom: 20px;
+    }
+
+    .form-floating > .form-control {
+        height: 58px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .form-floating > .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.15);
+    }
+
+    .form-floating > label {
+        padding: 1rem 0.75rem;
+        color: #666;
+    }
+
+    .form-select {
+        height: 58px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.15);
+    }
+
+    .input-group-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+        z-index: 10;
+        cursor: pointer;
+    }
+
+    .password-toggle {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .btn-register {
+        width: 100%;
+        padding: 15px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--primary-color), var(--success-color));
+        border: none;
+        color: white;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+    }
+
+    .btn-register:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(255, 107, 53, 0.4);
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .login-link a {
+        color: var(--primary-color);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+
+    .password-strength {
+        height: 5px;
+        background: #e0e0e0;
+        border-radius: 5px;
+        margin-top: 10px;
+        overflow: hidden;
+    }
+
+    .password-strength-bar {
+        height: 100%;
+        width: 0%;
+        transition: all 0.3s ease;
+    }
+
+    .strength-weak {
+        background: #f44336;
+        width: 33%;
+    }
+
+    .strength-medium {
+        background: #ff9800;
+        width: 66%;
+    }
+
+    .strength-strong {
+        background: #4caf50;
+        width: 100%;
+    }
+
+    .password-requirements {
+        font-size: 0.85rem;
+        margin-top: 10px;
+        color: #666;
+    }
+
+    .password-requirements li {
+        margin-bottom: 5px;
+    }
+
+    .requirement-met {
+        color: #4caf50;
+    }
+
+    .requirement-not-met {
+        color: #999;
+    }
+
+    .gender-options {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .gender-option {
+        flex: 1;
+    }
+
+    .gender-option input[type="radio"] {
+        display: none;
+    }
+
+    .gender-option label {
+        display: block;
+        padding: 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .gender-option input[type="radio"]:checked + label {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .gender-option label:hover {
+        border-color: var(--primary-color);
+    }
+
+    .features-section {
+        background: #f8f9fa;
+        padding: 30px;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .feature-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--primary-color), var(--success-color));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+
+    .feature-content h5 {
+        margin: 0 0 5px 0;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .feature-content p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    @@media (max-width: 768px) {
+        .register-header h2 {
+            font-size: 2rem;
+        }
+
+        .register-body {
+            padding: 30px 20px;
+        }
+
+        .gender-options {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<section class="register-section">
+    <div class="register-container" data-aos="fade-up">
+        <div class="row g-0">
+            <!-- Sol Taraf - Form -->
+            <div class="col-lg-7">
+                <div class="register-header">
+                    <h2><i class="fas fa-dumbbell"></i> FitZone'a Katılın</h2>
+                    <p>Fitness yolculuğunuza bugün başlayın!</p>
+                </div>
+                <div class="register-body">
+                    <form asp-action="Register" asp-controller="Account" method="post" id="registerForm">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <!-- İsim Soyisim -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="FirstName" class="form-control" placeholder="Adınız" />
+                                    <label asp-for="FirstName"><i class="fas fa-user me-2"></i>Adınız</label>
+                                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="LastName" class="form-control" placeholder="Soyadınız" />
+                                    <label asp-for="LastName"><i class="fas fa-user me-2"></i>Soyadınız</label>
+                                    <span asp-validation-for="LastName" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="form-floating">
+                            <input asp-for="Email" class="form-control" placeholder="Email" type="email" />
+                            <label asp-for="Email"><i class="fas fa-envelope me-2"></i>E-posta Adresi</label>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Şifre -->
+                        <div class="form-floating position-relative">
+                            <input asp-for="Password" class="form-control" placeholder="Şifre" type="password" id="password" />
+                            <label asp-for="Password"><i class="fas fa-lock me-2"></i>Şifre</label>
+                            <i class="fas fa-eye input-group-icon password-toggle" id="togglePassword"></i>
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                            
+                            <div class="password-strength">
+                                <div class="password-strength-bar" id="strengthBar"></div>
+                            </div>
+                            
+                            <ul class="password-requirements" id="passwordRequirements">
+                                <li id="req-length"><i class="fas fa-circle"></i> En az 8 karakter</li>
+                                <li id="req-upper"><i class="fas fa-circle"></i> En az 1 büyük harf</li>
+                                <li id="req-lower"><i class="fas fa-circle"></i> En az 1 küçük harf</li>
+                                <li id="req-number"><i class="fas fa-circle"></i> En az 1 rakam</li>
+                            </ul>
+                        </div>
+
+                        <!-- Şifre Tekrar -->
+                        <div class="form-floating position-relative">
+                            <input asp-for="ConfirmPassword" class="form-control" placeholder="Şifre Tekrar" type="password" id="confirmPassword" />
+                            <label asp-for="ConfirmPassword"><i class="fas fa-lock me-2"></i>Şifre Tekrar</label>
+                            <i class="fas fa-eye input-group-icon password-toggle" id="toggleConfirmPassword"></i>
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Doğum Tarihi -->
+                        <div class="form-floating">
+                            <input asp-for="DateOfBirth" class="form-control" type="date" placeholder="Doğum Tarihi" />
+                            <label asp-for="DateOfBirth"><i class="fas fa-calendar me-2"></i>Doğum Tarihi (Opsiyonel)</label>
+                            <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Cinsiyet -->
+                        <label class="form-label fw-bold"><i class="fas fa-venus-mars me-2"></i>Cinsiyet (Opsiyonel)</label>
+                        <div class="gender-options">
+                            <div class="gender-option">
+                                <input type="radio" asp-for="Gender" value="Erkek" id="male" />
+                                <label for="male">
+                                    <i class="fas fa-mars"></i> Erkek
+                                </label>
+                            </div>
+                            <div class="gender-option">
+                                <input type="radio" asp-for="Gender" value="Kadın" id="female" />
+                                <label for="female">
+                                    <i class="fas fa-venus"></i> Kadın
+                                </label>
+                            </div>
+                            <div class="gender-option">
+                                <input type="radio" asp-for="Gender" value="Diğer" id="other" />
+                                <label for="other">
+                                    <i class="fas fa-genderless"></i> Diğer
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Kullanım Şartları -->
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="termsCheck" required />
+                            <label class="form-check-label" for="termsCheck">
+                                <a href="#" class="text-primary">Kullanım Şartları</a>'nı ve 
+                                <a href="#" class="text-primary">Gizlilik Politikası</a>'nı okudum, kabul ediyorum.
+                            </label>
+                        </div>
+
+                        <!-- Üye Ol Butonu -->
+                        <button type="submit" class="btn btn-register">
+                            <i class="fas fa-user-plus me-2"></i>Üye Ol
+                        </button>
+
+                        <!-- Giriş Linki -->
+                        <div class="login-link">
+                            <p>Zaten hesabınız var mı? 
+                                <a href="@Url.Action("Login", "Account")">Giriş Yapın</a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sağ Taraf - Özellikler -->
+            <div class="col-lg-5 d-none d-lg-block">
+                <div class="features-section h-100">
+                    <h4 class="mb-4 fw-bold text-center">Neden FitZone?</h4>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h5>Profesyonel Antrenörler</h5>
+                            <p>Sertifikalı ve deneyimli antrenörlerimizle çalışın</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h5>Kolay Randevu Sistemi</h5>
+                            <p>Kolayca randevu alın ve yönetin</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h5>AI Fitness Asistanı</h5>
+                            <p>Yapay zeka destekli kişisel antrenman planları</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-dumbbell"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h5>Modern Ekipmanlar</h5>
+                            <p>En son teknoloji fitness ekipmanları</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h5>İlerleme Takibi</h5>
+                            <p>Fitness hedeflerinizi takip edin</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h5>Esnek Saatler</h5>
+                            <p>Size uygun saatte antrenman yapın</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Şifre Göster/Gizle
+        const togglePassword = document.getElementById('togglePassword');
+        const password = document.getElementById('password');
+        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+
+        togglePassword.addEventListener('click', function() {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        toggleConfirmPassword.addEventListener('click', function() {
+            const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPassword.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        // Şifre Güvenlik Kontrolü
+        password.addEventListener('input', function() {
+            const value = this.value;
+            const strengthBar = document.getElementById('strengthBar');
+            
+            let strength = 0;
+            const requirements = {
+                length: value.length >= 8,
+                upper: /[A-Z]/.test(value),
+                lower: /[a-z]/.test(value),
+                number: /[0-9]/.test(value)
+            };
+
+            // Gereksinimleri işaretle
+            document.getElementById('req-length').className = requirements.length ? 'requirement-met' : 'requirement-not-met';
+            document.getElementById('req-upper').className = requirements.upper ? 'requirement-met' : 'requirement-not-met';
+            document.getElementById('req-lower').className = requirements.lower ? 'requirement-met' : 'requirement-not-met';
+            document.getElementById('req-number').className = requirements.number ? 'requirement-met' : 'requirement-not-met';
+
+            // Güç hesapla
+            Object.values(requirements).forEach(met => {
+                if (met) strength++;
+            });
+
+            // Renk ve genişlik ayarla
+            strengthBar.className = 'password-strength-bar';
+            if (strength === 0) {
+                strengthBar.style.width = '0%';
+            } else if (strength <= 2) {
+                strengthBar.classList.add('strength-weak');
+            } else if (strength === 3) {
+                strengthBar.classList.add('strength-medium');
+            } else {
+                strengthBar.classList.add('strength-strong');
+            }
+        });
+
+        // Form Validasyonu
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Şifreler eşleşmiyor!');
+                return false;
+            }
+
+            if (password.length < 8) {
+                e.preventDefault();
+                alert('Şifre en az 8 karakter olmalıdır!');
+                return false;
+            }
+        });
+    </script>
+}

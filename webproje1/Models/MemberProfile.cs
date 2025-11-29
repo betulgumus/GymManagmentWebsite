@@ -36,6 +36,8 @@ namespace webproje1.Models
         [MaxLength(500)]
         public string? ProfilePhotoPath { get; set; }
 
+        public DateTime RegistrationDate { get; set; } = DateTime.Now;
+
         // Navigation Properties
         [ForeignKey("UserId")]
         public virtual ApplicationUser User { get; set; }

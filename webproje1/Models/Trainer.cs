@@ -14,21 +14,10 @@ namespace webproje1.Models
         [Required]
         public int GymCenterId { get; set; }
 
-        [MaxLength(1000)]
-        public string? Biography { get; set; }
+       
+        
 
-        [MaxLength(500)]
-        public string? Specializations { get; set; } // Virgülle ayrılmış: "Kilo Verme, Kas Geliştirme, Yoga"
-
-        [Range(0, 50)]
-        public int ExperienceYears { get; set; }
-
-        [MaxLength(500)]
-        public string? CertificationInfo { get; set; }
-
-        [Column(TypeName = "decimal(18,2)")]
-        [Range(0, 5000)]
-        public decimal? HourlyRate { get; set; }
+        
 
         public bool IsAvailable { get; set; } = true;
 
