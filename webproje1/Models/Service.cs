@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using webproje1.Models;
 
 namespace webproje1.Models
 {
@@ -32,9 +31,20 @@ namespace webproje1.Models
         [MaxLength(500)]
         public string? Description { get; set; }
 
+        // ===== SeedData "Duration" kullanıyor, sen "DurationMinutes" =====
+        // İkisini de ekleyelim veya birini diğerine map edelim
+
         [Required]
         [Range(15, 240)]
         public int DurationMinutes { get; set; }
+
+        // SeedData için alias (opsiyonel ama güvenli)
+        [NotMapped] // Veritabanına eklenmez, sadece kod içinde kullanılır
+        public int Duration
+        {
+            get => DurationMinutes;
+            set => DurationMinutes = value;
+        }
 
         [Required]
         [Column(TypeName = "decimal(18,2)")]
@@ -49,6 +59,7 @@ namespace webproje1.Models
         // Navigation Properties
         [ForeignKey("GymCenterId")]
         public virtual GymCenter GymCenter { get; set; }
+
         public virtual ICollection<TrainerService> TrainerServices { get; set; }
         public virtual ICollection<Appointment> Appointments { get; set; }
     }

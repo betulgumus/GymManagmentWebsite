@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using webproje1.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace webproje1.Models
 {
@@ -19,6 +19,15 @@ namespace webproje1.Models
         [Phone]
         [MaxLength(20)]
         public string PhoneNumber { get; set; }
+
+        // SeedData "Phone" kullanıyor, sen "PhoneNumber" kullanıyorsun
+        // İkisi de çalışsın diye alias ekleyelim
+        [NotMapped] // Veritabanına eklenmez
+        public string Phone
+        {
+            get => PhoneNumber;
+            set => PhoneNumber = value;
+        }
 
         [Required]
         [EmailAddress]

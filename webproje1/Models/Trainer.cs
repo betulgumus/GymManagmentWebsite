@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using webproje1.Models;
 
 namespace webproje1.Models
 {
@@ -14,11 +13,20 @@ namespace webproje1.Models
         [Required]
         public int GymCenterId { get; set; }
 
-       
-        
+        // ===== EKSİK PROPERTY'LER (SeedData bunları kullanıyor) =====
+        [Required]
+        [MaxLength(200)]
+        public string Specialization { get; set; } = string.Empty;  // ← YENİ!
 
-        
+        [MaxLength(1000)]
+        public string? Bio { get; set; }  // ← YENİ!
 
+        public int ExperienceYears { get; set; } = 0;  // ← YENİ!
+
+        [MaxLength(500)]
+        public string? PhotoUrl { get; set; }  // ← YENİ!
+
+        // ===== MEVCUT PROPERTY'LER =====
         public bool IsAvailable { get; set; } = true;
 
         // Navigation Properties

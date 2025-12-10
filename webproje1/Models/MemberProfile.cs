@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using webproje1.Models;
 
 namespace webproje1.Models
 {
@@ -18,6 +17,19 @@ namespace webproje1.Models
         [Required]
         public string UserId { get; set; }
 
+        // ===== AccountController İÇİN EKSİK PROPERTY'LER =====
+        [MaxLength(100)]
+        public string? FirstName { get; set; }  // ← YENİ EKLENDI!
+
+        [MaxLength(100)]
+        public string? LastName { get; set; }  // ← YENİ EKLENDI!
+
+        [DataType(DataType.Date)]
+        public DateTime? DateOfBirth { get; set; }  // ← YENİ EKLENDI!
+
+        public DateTime JoinDate { get; set; } = DateTime.Now;  // ← YENİ EKLENDI!
+
+        // ===== MEVCUT FITNESS PROPERTY'LERİN =====
         [Range(100, 250)]
         public int? Height { get; set; } // cm
 
@@ -41,5 +53,7 @@ namespace webproje1.Models
         // Navigation Properties
         [ForeignKey("UserId")]
         public virtual ApplicationUser User { get; set; }
+
+        public virtual ICollection<Appointment> Appointments { get; set; }  // ← İlişki eklendi
     }
 }
