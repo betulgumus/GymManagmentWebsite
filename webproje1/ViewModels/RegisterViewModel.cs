@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace webproje1.ViewModels
 {
@@ -23,13 +24,15 @@ namespace webproje1.ViewModels
         [Display(Name = "Şifre")]
         public string Password { get; set; }
 
+        [Required(ErrorMessage = "Şifre tekrarı gereklidir")]
         [DataType(DataType.Password)]
         [Display(Name = "Şifre Tekrar")]
         [Compare("Password", ErrorMessage = "Şifreler eşleşmiyor.")]
-        public string ConfirmPassword { get; set; }
+        public string ConfirmPassword { get; set; }  // ← ? YOK! Required!
 
         [Display(Name = "Doğum Tarihi")]
         [DataType(DataType.Date)]
         public DateTime? DateOfBirth { get; set; }
     }
 }
+

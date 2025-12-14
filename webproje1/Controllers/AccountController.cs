@@ -30,10 +30,14 @@ namespace webproje1.Controllers
         }
 
         // POST: /Account/Register
+        // POST: /Account/Register
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
+            // ConfirmPassword kontrolü kaldır
+            ModelState.Remove("ConfirmPassword");  // ← YENİ SATIR!
+
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser
