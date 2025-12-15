@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using webproje1.Models;
-using webproje1.ViewModels;
 using webproje1.Data;
+using webproje1.ViewModels;
 
 namespace webproje1.Controllers
 {
