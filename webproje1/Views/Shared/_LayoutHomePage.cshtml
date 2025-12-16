@@ -22,18 +22,15 @@
                     FitZone
                 </a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
 
-                <div class="collapse navbar-collapse" id="navbarNav">
+
+                <div class="navbar-collapse">
                     <ul class="navbar-nav ms-auto align-items-center">
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Home" asp-action="Index">Anasayfa</a>
                         </li>
-                        <li class="nav-item"><a class="nav-link">Hizmetler</a></li>
-                        <li class="nav-item"><a class="nav-link">Antrenörler</a></li>
+@*                         <li class="nav-item"><a class="nav-link">Hizmetler</a></li>
+                        <li class="nav-item"><a class="nav-link">Antrenörler</a></li> *@
 
                         @if (User.Identity.IsAuthenticated)
                         {
@@ -53,10 +50,8 @@
                                 </a>
                             </li>
                             <li class="nav-item ms-2">
-                                <a class="btn btn-primary"
-                                   asp-controller="Account" asp-action="Register">
-                                    Üye Ol
-                                </a>
+                                <a class="btn btn-outline-primary">Üye Ol</a>
+
                             </li>
                         }
                     </ul>

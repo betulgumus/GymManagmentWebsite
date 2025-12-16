@@ -51,7 +51,7 @@ using (var scope = app.Services.CreateScope())
         await context.Database.MigrateAsync();
 
         // Seed data
-        await SeedData.Initialize(services, userManager, roleManager);
+        //await SeedData.Initialize(services, userManager, roleManager);
     }
     catch (Exception ex)
     {
@@ -77,5 +77,8 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+await webproje1.Data.IdentitySeed.SeedRolesAndAdminAsync(app.Services);
+
 
 app.Run();
