@@ -1,49 +1,58 @@
-﻿using Microsoft.AspNetCore.Identity;
-using webproje1.Models;
+﻿//using Microsoft.AspNetCore.Identity;
+//using webproje1.Models;
 
-namespace webproje1.Data
-{
-    public static class IdentitySeed
-    {
-        public static async Task SeedRolesAndAdminAsync(IServiceProvider services)
-        {
-            using var scope = services.CreateScope();
+//namespace webproje1.Data
+//{
+//    public static class IdentitySeed
+//    {
+//        public static async Task SeedAsync(IServiceProvider serviceProvider)
+//        {
+//            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+//            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+//            // Rolleri oluştur
+//            string[] roles = { "Admin", "Member", "Trainer" };
+//            foreach (var role in roles)
+//            {
+//                if (!await roleManager.RoleExistsAsync(role))
+//                {
+//                    await roleManager.CreateAsync(new IdentityRole(role));
+//                }
+//            }
 
-            string[] roles = { "Admin", "Trainer", "Member" };
+//            // Admin kullanıcısı oluştur
+//            string adminEmail = "ogrencinumarasi@sakarya.edu.tr";  // ← DÜZELTİLDİ!
+//            string adminPassword = "sau";  // ← 6 karakter olmalı!
 
-            foreach (var role in roles)
-            {
-                if (!await roleManager.RoleExistsAsync(role))
-                    await roleManager.CreateAsync(new IdentityRole(role));
-            }
+//            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+//            if (adminUser == null)
+//            {
+//                adminUser = new ApplicationUser
+//                {
+//                    UserName = adminEmail,
+//                    Email = adminEmail,
+//                    EmailConfirmed = true
+//                };
 
-            var adminEmail = "ogrencinumaraniz@sakarya.edu.tr"; // BURAYI DEĞİŞTİR
-            var adminPassword = "sau2025";                          // BURAYI DEĞİŞTİR
-
-            var adminUser = await userManager.FindByEmailAsync(adminEmail);
-            if (adminUser == null)
-            {
-                adminUser = new ApplicationUser
-                {
-                    UserName = adminEmail,
-                    Email = adminEmail,
-                    EmailConfirmed = true
-                };
-
-                var result = await userManager.CreateAsync(adminUser, adminPassword);
-                if (!result.Succeeded)
-                {
-                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                    throw new Exception("Admin oluşturulamadı: " + errors);
-                }
-            }
-
-            if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
-                await userManager.AddToRoleAsync(adminUser, "Admin");
-        }
-    }
-}
-
+//                var result = await userManager.CreateAsync(adminUser, adminPassword);
+//                if (result.Succeeded)
+//                {
+//                    await userManager.AddToRoleAsync(adminUser, "Admin");
+//                    Console.WriteLine("✅ Admin kullanıcısı oluşturuldu: " + adminEmail);
+//                }
+//                else
+//                {
+//                    Console.WriteLine("❌ Admin oluşturulamadı!");
+//                    foreach (var error in result.Errors)
+//                    {
+//                        Console.WriteLine($"  - {error.Description}");
+//                    }
+//                }
+//            }
+//            else
+//            {
+//                Console.WriteLine("ℹ️ Admin zaten var!");
+//            }
+//        }
+//    }
+//}

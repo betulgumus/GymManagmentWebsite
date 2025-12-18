@@ -22,67 +22,73 @@ namespace webproje1.Controllers
             _context = context;
         }
 
-        // GET: /Account/Register
+        // =========================
+        // REGISTER
+        // =========================
+
         [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
 
-        // POST: /Account/Register
-        // POST: /Account/Register
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            // ConfirmPassword kontrolü kaldır
-            ModelState.Remove("ConfirmPassword");  // ← YENİ SATIR!
+            ModelState.Remove("ConfirmPassword");
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = new ApplicationUser
             {
-                var user = new ApplicationUser
-                {
-                    UserName = model.Email,
-                    Email = model.Email,
-                    EmailConfirmed = true
-                };
+                UserName = model.Email,
+                Email = model.Email,
+                EmailConfirmed = true
+            };
 
-                var result = await _userManager.CreateAsync(user, model.Password);
+            var result = await _userManager.CreateAsync(user, model.Password);
 
-                if (result.Succeeded)
-                {
-                    // Üye rolü ekle
-                    await _userManager.AddToRoleAsync(user, "Member");
-
-                    // MemberProfile oluştur
-                    var memberProfile = new MemberProfile
-                    {
-                        UserId = user.Id,
-                        FirstName = model.FirstName,
-                        LastName = model.LastName,
-                        DateOfBirth = model.DateOfBirth,
-                        JoinDate = DateTime.Now
-                    };
-                    _context.MemberProfiles.Add(memberProfile);
-                    await _context.SaveChangesAsync();
-
-                    // Otomatik giriş yap
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-
-                    TempData["Success"] = "Kayıt başarılı! Hoş geldiniz.";
-                    return RedirectToAction("Index", "Home");
-                }
-
+            if (!result.Succeeded)
+            {
                 foreach (var error in result.Errors)
-                {
                     ModelState.AddModelError(string.Empty, error.Description);
-                }
+
+                return View(model);
             }
 
-            return View(model);
+            // 🔹 İlk kullanıcı Admin olsun
+            var userCount = _context.Users.Count();
+
+            if (userCount == 1)
+                await _userManager.AddToRoleAsync(user, "Admin");
+            else
+                await _userManager.AddToRoleAsync(user, "Member");
+
+            // 🔹 MemberProfile oluştur
+            var memberProfile = new MemberProfile
+            {
+                UserId = user.Id,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                DateOfBirth = model.DateOfBirth,
+                JoinDate = DateTime.Now
+            };
+
+            _context.MemberProfiles.Add(memberProfile);
+            await _context.SaveChangesAsync();
+
+            // 🔹 Otomatik giriş
+            await _signInManager.SignInAsync(user, isPersistent: false);
+
+            return RedirectToAction("Index", "Home");
         }
 
-        // GET: /Account/Login
+        // =========================
+        // LOGIN
+        // =========================
+
         [HttpGet]
         public IActionResult Login(string returnUrl = null)
         {
@@ -90,47 +96,55 @@ namespace webproje1.Controllers
             return View();
         }
 
-        // POST: /Account/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var result = await _signInManager.PasswordSignInAsync(
+                model.Email,
+                model.Password,
+                model.RememberMe,
+                lockoutOnFailure: false);
+
+            if (!result.Succeeded)
             {
-                var result = await _signInManager.PasswordSignInAsync(
-                    model.Email,
-                    model.Password,
-                    model.RememberMe,
-                    lockoutOnFailure: false);
-
-                if (result.Succeeded)
-                {
-                    if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                    {
-                        return Redirect(returnUrl);
-                    }
-                    return RedirectToAction("Index", "Home");
-                }
-
                 ModelState.AddModelError(string.Empty, "Geçersiz giriş denemesi.");
+                return View(model);
             }
 
-            return View(model);
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            // 🔹 ROL BAZLI YÖNLENDİRME
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+                return RedirectToAction("Index", "Admin");
+
+            if (await _userManager.IsInRoleAsync(user, "Trainer"))
+                return RedirectToAction("Index", "Trainer");
+
+            return RedirectToAction("Index", "Home");
         }
 
-        // POST: /Account/Logout
+        // =========================
+        // LOGOUT
+        // =========================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            TempData["Success"] = "Çıkış yapıldı.";
             return RedirectToAction("Index", "Home");
         }
 
-        // GET: /Account/AccessDenied
+        // =========================
+        // ACCESS DENIED
+        // =========================
+
         public IActionResult AccessDenied()
         {
             return View();

@@ -32,63 +32,26 @@ namespace webproje1.Data
                 relationship.DeleteBehavior = DeleteBehavior.Restrict;
             }
 
-            // Appointment - Member ilişkisi
-            modelBuilder.Entity<Appointment>()
-                .HasOne(a => a.Member)
-                .WithMany()
-                .HasForeignKey(a => a.MemberId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Appointment - Trainer ilişkisi
-            modelBuilder.Entity<Appointment>()
-                .HasOne(a => a.Trainer)
-                .WithMany(t => t.Appointments)
-                .HasForeignKey(a => a.TrainerId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Appointment - Service ilişkisi
-            modelBuilder.Entity<Appointment>()
-                .HasOne(a => a.Service)
-                .WithMany()
-                .HasForeignKey(a => a.ServiceId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Appointment - GymCenter ilişkisi
-            modelBuilder.Entity<Appointment>()
-                .HasOne(a => a.GymCenter)
-                .WithMany()
-                .HasForeignKey(a => a.GymCenterId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // TrainerService çoka-çok ilişkisi
+            // TrainerService çoka-çok ilişkisi (Composite Key)
             modelBuilder.Entity<TrainerService>()
                 .HasKey(ts => new { ts.TrainerId, ts.ServiceId });
 
-            modelBuilder.Entity<TrainerService>()
-                .HasOne(ts => ts.Trainer)
-                .WithMany(t => t.TrainerServices)
-                .HasForeignKey(ts => ts.TrainerId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<TrainerService>()
-                .HasOne(ts => ts.Service)
-                .WithMany(s => s.TrainerServices)
-                .HasForeignKey(ts => ts.ServiceId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Trainer - User ilişkisi
+            // Trainer - User ilişkisi (One-to-One)
             modelBuilder.Entity<Trainer>()
                 .HasOne(t => t.User)
                 .WithOne()
                 .HasForeignKey<Trainer>(t => t.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // MemberProfile - User ilişkisi
+            // MemberProfile - User ilişkisi (One-to-One)
             modelBuilder.Entity<MemberProfile>()
                 .HasOne(m => m.User)
                 .WithOne()
                 .HasForeignKey<MemberProfile>(m => m.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // NOT: Appointment ilişkileri SİLİNDİ! 
+            // EF Core otomatik algılıyor (convention-based)
         }
     }
 }

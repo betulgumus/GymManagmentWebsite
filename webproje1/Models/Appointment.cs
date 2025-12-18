@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using webproje1.Models;
 
 namespace webproje1.Models
 {
@@ -54,17 +53,10 @@ namespace webproje1.Models
 
         public DateTime? ConfirmedDate { get; set; }
 
-        // Navigation Properties
-        [ForeignKey("MemberId")]
+        // Navigation Properties (ForeignKey attributeleri SİLİNDİ!)
         public virtual ApplicationUser Member { get; set; }
-
-        [ForeignKey("TrainerId")]
         public virtual Trainer Trainer { get; set; }
-
-        [ForeignKey("ServiceId")]
         public virtual Service Service { get; set; }
-
-        [ForeignKey("GymCenterId")]
         public virtual GymCenter GymCenter { get; set; }
     }
 }

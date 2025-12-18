@@ -1,0 +1,24 @@
+﻿@{
+    ViewData["Title"] = "Trainer Panel";
+}
+
+<div class="container mt-5">
+    <div class="alert alert-info">
+        <h4>🏋️ Trainer Paneline Hoş Geldiniz</h4>
+        <p><strong>Email:</strong> @ViewBag.TrainerEmail</p>
+        <p><strong>Rol:</strong> Trainer</p>
+    </div>
+
+    <div class="mt-4">
+        <h5>📋 Trainer Yetkileri</h5>
+        <ul>
+            <li>Üyelere antrenman planı oluşturma</li>
+            <li>Randevuları görüntüleme</li>
+            <li>İlerleme takibi</li>
+        </ul>
+    </div>
+
+    <form asp-controller="Account" asp-action="Logout" method="post" class="mt-4">
+        <button class="btn btn-danger">🚪 Çıkış Yap</button>
+    </form>
+</div>

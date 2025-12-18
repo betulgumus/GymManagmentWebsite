@@ -12,8 +12,8 @@ using webproje1.Data;
 namespace webproje1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251216085832_AddIdentitySeed")]
-    partial class AddIdentitySeed
+    [Migration("20251217181112_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -207,15 +207,10 @@ namespace webproje1.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ConfirmPassword")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
@@ -223,7 +218,6 @@ namespace webproje1.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("FirstName")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -232,7 +226,6 @@ namespace webproje1.Migrations
                         .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("LastName")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -252,11 +245,6 @@ namespace webproje1.Migrations
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
@@ -305,9 +293,6 @@ namespace webproje1.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("AppointmentDate")
                         .HasColumnType("datetime2");
 
@@ -321,9 +306,6 @@ namespace webproje1.Migrations
                         .HasColumnType("time");
 
                     b.Property<int>("GymCenterId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("GymCenterId1")
                         .HasColumnType("int");
 
                     b.Property<string>("MemberId")
@@ -340,9 +322,6 @@ namespace webproje1.Migrations
                     b.Property<int>("ServiceId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ServiceId1")
-                        .HasColumnType("int");
-
                     b.Property<TimeSpan>("StartTime")
                         .HasColumnType("time");
 
@@ -357,19 +336,13 @@ namespace webproje1.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
-
                     b.HasIndex("GymCenterId");
-
-                    b.HasIndex("GymCenterId1");
 
                     b.HasIndex("MemberId");
 
                     b.HasIndex("MemberProfileId");
 
                     b.HasIndex("ServiceId");
-
-                    b.HasIndex("ServiceId1");
 
                     b.HasIndex("TrainerId");
 
@@ -690,22 +663,14 @@ namespace webproje1.Migrations
 
             modelBuilder.Entity("webproje1.Models.Appointment", b =>
                 {
-                    b.HasOne("webproje1.Models.ApplicationUser", null)
-                        .WithMany("Appointments")
-                        .HasForeignKey("ApplicationUserId");
-
                     b.HasOne("webproje1.Models.GymCenter", "GymCenter")
-                        .WithMany()
+                        .WithMany("Appointments")
                         .HasForeignKey("GymCenterId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("webproje1.Models.GymCenter", null)
-                        .WithMany("Appointments")
-                        .HasForeignKey("GymCenterId1");
-
                     b.HasOne("webproje1.Models.ApplicationUser", "Member")
-                        .WithMany()
+                        .WithMany("Appointments")
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -716,14 +681,10 @@ namespace webproje1.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("webproje1.Models.Service", "Service")
-                        .WithMany()
+                        .WithMany("Appointments")
                         .HasForeignKey("ServiceId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("webproje1.Models.Service", null)
-                        .WithMany("Appointments")
-                        .HasForeignKey("ServiceId1");
 
                     b.HasOne("webproje1.Models.Trainer", "Trainer")
                         .WithMany("Appointments")

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace webproje1.ViewModels
@@ -28,7 +29,9 @@ namespace webproje1.ViewModels
         [DataType(DataType.Password)]
         [Display(Name = "Şifre Tekrar")]
         [Compare("Password", ErrorMessage = "Şifreler eşleşmiyor.")]
-        public string ConfirmPassword { get; set; }  // ← ? YOK! Required!
+        [NotMapped]
+        public string? ConfirmPassword { get; set; }  // ← ? ekle
+
 
         [Display(Name = "Doğum Tarihi")]
         [DataType(DataType.Date)]

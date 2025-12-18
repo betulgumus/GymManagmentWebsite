@@ -1,9 +1,73 @@
-﻿@{
-    ViewData["Title"] = "Admin Panel";
-    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+﻿@model List<webproje1.Models.ApplicationUser>
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
 }
 
-<div class="container py-5">
-    <h2>Admin Panel</h2>
-    <p>Burayı sadece Admin görebilir.</p>
+<div class="container mt-5">
+    <div class="alert alert-success">
+        <h4>✅ Hoş Geldiniz Admin!</h4>
+        <p><strong>Email:</strong> @ViewBag.AdminEmail</p>
+        <p><strong>Rol:</strong> Admin</p>
+    </div>
+
+    <hr class="my-4" />
+
+    <h3>👥 Kullanıcılar</h3>
+
+    <table class="table table-bordered mt-3">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.Email</td>
+                    <td>
+                        @if (user.Email == ViewBag.AdminEmail)
+                        {
+                            <span class="badge bg-danger">Admin</span>
+                        }
+                        else if (((List<string>)ViewBag.TrainerIds).Contains(user.Id))
+                        {
+                            <span class="badge bg-info">Trainer</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Member</span>
+                        }
+                    </td>
+                    <td>
+                        @if (
+                       user.Email != ViewBag.AdminEmail &&
+                       !((List<string>)ViewBag.TrainerIds).Contains(user.Id)
+                       )
+                        {
+                            <form asp-action="MakeTrainer" method="post">
+                                <input type="hidden" name="userId" value="@user.Id" />
+                                <button type="submit" class="btn btn-warning btn-sm">
+                                    Trainer Yap
+                                </button>
+                            </form>
+                        }
+                        else if (((List<string>)ViewBag.TrainerIds).Contains(user.Id))
+                        {
+                            <span class="text-success">✔</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="mt-5">
+        <form asp-controller="Account" asp-action="Logout" method="post">
+            <button type="submit" class="btn btn-danger">🚪 Çıkış Yap</button>
+        </form>
+    </div>
 </div>

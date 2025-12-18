@@ -35,12 +35,20 @@
                         @if (User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item ms-2">
-                                <a class="btn btn-outline-danger"
-                                   asp-controller="Account" asp-action="Logout">
-                                    Çıkış
-                                </a>
+                                <form asp-controller="Account"
+                                      asp-action="Logout"
+                                      method="post"
+                                      class="d-inline">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit" class="btn btn-outline-danger">
+                                        Çıkış
+                                    </button>
+                                </form>
                             </li>
                         }
+
                         else
                         {
                             <li class="nav-item ms-2">

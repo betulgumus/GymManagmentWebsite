@@ -14,8 +14,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     // ?ifre gereksinimleri
-    options.Password.RequireDigit = true;
-    options.Password.RequiredLength = 6;
+    options.Password.RequireDigit = false;
+    options.Password.RequiredLength = 3;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
     options.Password.RequireLowercase = false;
@@ -37,26 +37,18 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Seed Data (?lk verileri ekle)
+// Sadece Rolleri Olu?tur (Admin, Member, Trainer)
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<ApplicationDbContext>();
-        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-        // Database olu?tur
-        await context.Database.MigrateAsync();
-
-        // Seed data
-        //await SeedData.Initialize(services, userManager, roleManager);
-    }
-    catch (Exception ex)
+    string[] roles = { "Admin", "Member", "Trainer" };
+    foreach (var role in roles)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Seed data s?ras?nda hata olu?tu.");
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
     }
 }
 
@@ -71,14 +63,11 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication(); // ? ÖNEML?! Bu sat?r olmal?
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
-await webproje1.Data.IdentitySeed.SeedRolesAndAdminAsync(app.Services);
-
 
 app.Run();

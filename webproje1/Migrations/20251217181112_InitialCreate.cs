@@ -127,10 +127,7 @@ namespace webproje1.Migrations
                     Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ConfirmedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    GymCenterId1 = table.Column<int>(type: "int", nullable: true),
-                    MemberProfileId = table.Column<int>(type: "int", nullable: true),
-                    ServiceId1 = table.Column<int>(type: "int", nullable: true)
+                    MemberProfileId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -142,21 +139,11 @@ namespace webproje1.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Appointments_GymCenters_GymCenterId1",
-                        column: x => x.GymCenterId1,
-                        principalTable: "GymCenters",
-                        principalColumn: "Id");
-                    table.ForeignKey(
                         name: "FK_Appointments_Services_ServiceId",
                         column: x => x.ServiceId,
                         principalTable: "Services",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Appointments_Services_ServiceId1",
-                        column: x => x.ServiceId1,
-                        principalTable: "Services",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -211,17 +198,15 @@ namespace webproje1.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    ConfirmPassword = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Gender = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
                     MemberProfileId = table.Column<int>(type: "int", nullable: true),
                     TrainerId = table.Column<int>(type: "int", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -374,19 +359,9 @@ namespace webproje1.Migrations
                 column: "MemberId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Appointments_ApplicationUserId",
-                table: "Appointments",
-                column: "ApplicationUserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Appointments_GymCenterId",
                 table: "Appointments",
                 column: "GymCenterId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Appointments_GymCenterId1",
-                table: "Appointments",
-                column: "GymCenterId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Appointments_MemberId",
@@ -402,11 +377,6 @@ namespace webproje1.Migrations
                 name: "IX_Appointments_ServiceId",
                 table: "Appointments",
                 column: "ServiceId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Appointments_ServiceId1",
-                table: "Appointments",
-                column: "ServiceId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Appointments_TrainerId",
@@ -501,13 +471,6 @@ namespace webproje1.Migrations
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Appointments_AspNetUsers_ApplicationUserId",
-                table: "Appointments",
-                column: "ApplicationUserId",
-                principalTable: "AspNetUsers",
-                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Appointments_AspNetUsers_MemberId",
