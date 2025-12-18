@@ -126,8 +126,11 @@ namespace webproje1.Controllers
             if (await _userManager.IsInRoleAsync(user, "Trainer"))
                 return RedirectToAction("Index", "Trainer");
 
+            if (await _userManager.IsInRoleAsync(user, "Member"))
+                return RedirectToAction("Index", "Member");  // ← YENİ EKLENEN!
+
             return RedirectToAction("Index", "Home");
-        }
+        } 
 
         // =========================
         // LOGOUT

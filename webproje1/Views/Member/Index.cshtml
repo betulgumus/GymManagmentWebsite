@@ -1,0 +1,68 @@
+﻿@{
+    ViewData["Title"] = "Üye Paneli";
+}
+
+<div class="container mt-5">
+    <div class="alert alert-success">
+        <h4>👋 Hoş Geldiniz, @ViewBag.MemberName!</h4>
+        <p><strong>Email:</strong> @ViewBag.Email</p>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h3>🎯 Üye Paneli</h3>
+            <p>Aşağıdaki seçenekleri kullanarak işlemlerinizi yapabilirsiniz.</p>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">📅 Randevu Al</h5>
+                    <p class="card-text">Antrenörlerden randevu alın</p>
+                    <a asp-action="BookAppointment" class="btn btn-primary">Randevu Al</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">📋 Randevularım</h5>
+                    <p class="card-text">Randevularınızı görüntüleyin</p>
+                    <a asp-action="MyAppointments" class="btn btn-info">Görüntüle</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">👨‍🏫 Antrenörler</h5>
+                    <p class="card-text">Antrenörleri görüntüleyin</p>
+                    <a asp-action="Trainers" class="btn btn-warning">Antrenörler</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">🏋️ Hizmetler</h5>
+                    <p class="card-text">Hizmetleri görüntüleyin</p>
+                    <a asp-action="Services" class="btn btn-success">Hizmetler</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <a asp-action="Profile" class="btn btn-secondary">👤 Profilim</a>
+            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                <button type="submit" class="btn btn-danger">🚪 Çıkış Yap</button>
+            </form>
+        </div>
+    </div>
+</div>
