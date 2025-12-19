@@ -1,0 +1,129 @@
+﻿@model List<webproje1.Models.TrainerAvailability>
+@using webproje1.Models
+
+@{
+    ViewData["Title"] = "Müsaitlik Ayarları";
+}
+
+<div class="container mt-5">
+    <h2>🕐 Müsaitlik Ayarları</h2>
+    <hr />
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="alert alert-info">
+        <strong>ℹ️ Bilgilendirme:</strong>
+        <p class="mb-0">Çalışma saatlerinizi belirleyin. Üyeler sadece müsait olduğunuz saatlerde randevu alabilir.</p>
+    </div>
+
+    <div class="mb-3">
+        <a asp-action="AddAvailability" class="btn btn-success">➕ Yeni Müsaitlik Ekle</a>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-warning">
+            <h5>⚠️ Henüz müsaitlik kaydınız bulunmamaktadır!</h5>
+            <p>Üyelerin randevu alabilmesi için müsaitlik eklemeniz gerekmektedir.</p>
+            <a asp-action="AddAvailability" class="btn btn-primary">➕ İlk Müsaitliğinizi Ekleyin</a>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">📅 Çalışma Programınız</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Gün</th>
+                                <th>Başlangıç Saati</th>
+                                <th>Bitiş Saati</th>
+                                <th>Süre</th>
+                                <th>Durum</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var availability in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>
+                                            @switch (availability.DayOfWeek)
+                                            {
+                                                case DayOfWeekEnum.Monday:
+                                                    <text>📅 Pazartesi</text>
+                                                    break;
+                                                case DayOfWeekEnum.Tuesday:
+                                                    <text>📅 Salı</text>
+                                                    break;
+                                                case DayOfWeekEnum.Wednesday:
+                                                    <text>📅 Çarşamba</text>
+                                                    break;
+                                                case DayOfWeekEnum.Thursday:
+                                                    <text>📅 Perşembe</text>
+                                                    break;
+                                                case DayOfWeekEnum.Friday:
+                                                    <text>📅 Cuma</text>
+                                                    break;
+                                                case DayOfWeekEnum.Saturday:
+                                                    <text>📅 Cumartesi</text>
+                                                    break;
+                                                case DayOfWeekEnum.Sunday:
+                                                    <text>📅 Pazar</text>
+                                                    break;
+                                            }
+                                        </strong>
+                                    </td>
+                                    <td>⏰ @availability.StartTime.ToString(@"hh\:mm")</td>
+                                    <td>⏰ @availability.EndTime.ToString(@"hh\:mm")</td>
+                                    <td>
+                                        @{
+                                            var duration = availability.EndTime - availability.StartTime;
+                                            @($"{duration.Hours} saat {duration.Minutes} dk")
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (availability.IsActive)
+                                        {
+                                            <span class="badge bg-success">✅ Aktif</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">❌ Pasif</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <form asp-action="DeleteAvailability" method="post" class="d-inline"
+                                              onsubmit="return confirm('Bu müsaitliği silmek istediğinize emin misiniz?');">
+                                            <input type="hidden" name="id" value="@availability.Id" />
+                                            <button type="submit" class="btn btn-danger btn-sm">🗑️ Sil</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-3">
+                    <p><strong>Toplam Müsaitlik Kaydı:</strong> @Model.Count</p>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="mt-4">
+        <a asp-action="Index" class="btn btn-secondary">← Geri Dön</a>
+    </div>
+</div>

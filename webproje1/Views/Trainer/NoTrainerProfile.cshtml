@@ -1,0 +1,100 @@
+﻿@{
+    ViewData["Title"] = "Trainer Profili Oluştur";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="alert alert-warning">
+                <h4>⚠️ Trainer Profiliniz Henüz Oluşturulmamış!</h4>
+                <p>Aşağıdaki formu doldurarark trainer profilinizi oluşturabilirsiniz.</p>
+            </div>
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">👨‍🏫 Trainer Profili Oluştur</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="CreateProfile" method="post">
+                        <div class="mb-3">
+                            <label for="Specialization" class="form-label">
+                                <strong>🎯 Uzmanlık Alanı</strong> <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   name="Specialization"
+                                   id="Specialization"
+                                   class="form-control"
+                                   placeholder="Örn: Fitness ve Güç Antrenmanı, Yoga, Pilates..."
+                                   required
+                                   maxlength="200" />
+                            <small class="text-muted">Hangi konularda uzmanınız?</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Bio" class="form-label">
+                                <strong>📝 Hakkınızda</strong>
+                            </label>
+                            <textarea name="Bio"
+                                      id="Bio"
+                                      class="form-control"
+                                      rows="4"
+                                      placeholder="Kendinizi tanıtın, eğitim geçmişiniz, sertifikalarınız..."
+                                      maxlength="1000"></textarea>
+                            <small class="text-muted">Üyeler sizi buradan tanıyacak. (Opsiyonel)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="ExperienceYears" class="form-label">
+                                <strong>📅 Deneyim (Yıl)</strong>
+                            </label>
+                            <input type="number"
+                                   name="ExperienceYears"
+                                   id="ExperienceYears"
+                                   class="form-control"
+                                   placeholder="Kaç yıldır antrenörsünüz?"
+                                   min="0"
+                                   max="50"
+                                   value="0" />
+                            <small class="text-muted">0 girebilirsiniz.</small>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <strong>ℹ️ Bilgilendirme:</strong>
+                            <ul class="mb-0">
+                                <li>Profiliniz oluşturulduktan sonra düzenleyebilirsiniz</li>
+                                <li>Üyeler profilinizi görebilir ve randevu alabilir</li>
+                                <li>Fotoğrafınızı daha sonra profil sayfasından yükleyebilirsiniz</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                ✅ Profili Oluştur
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="mt-3 text-center">
+                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-danger">
+                        🚪 Çıkış Yap
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -128,5 +128,51 @@ namespace webproje1.Controllers
 
             return View(memberProfile);
         }
+        // Profil Düzenle - GET
+        public async Task<IActionResult> EditProfile()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var memberProfile = await _context.MemberProfiles
+                .FirstOrDefaultAsync(m => m.UserId == user.Id);
+
+            if (memberProfile == null)
+            {
+                TempData["Error"] = "Profil bulunamadı!";
+                return RedirectToAction("Index");
+            }
+
+            return View(memberProfile);
+        }
+
+        // Profil Düzenle - POST
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditProfile(MemberProfile model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var memberProfile = await _context.MemberProfiles
+                .FirstOrDefaultAsync(m => m.UserId == user.Id);
+
+            if (memberProfile == null)
+            {
+                TempData["Error"] = "Profil bulunamadı!";
+                return RedirectToAction("Index");
+            }
+
+            // Güncellenebilir alanlar
+            memberProfile.FirstName = model.FirstName;
+            memberProfile.LastName = model.LastName;
+            memberProfile.DateOfBirth = model.DateOfBirth;
+            memberProfile.Height = model.Height;
+            memberProfile.Weight = model.Weight;
+            memberProfile.BodyType = model.BodyType;
+            memberProfile.FitnessGoal = model.FitnessGoal;
+            memberProfile.HealthConditions = model.HealthConditions;
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Profiliniz başarıyla güncellendi!";
+            return RedirectToAction("Profile");
+        }
     }
 }

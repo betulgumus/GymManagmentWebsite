@@ -1,0 +1,104 @@
+﻿@model webproje1.Models.Trainer
+
+@{
+    ViewData["Title"] = "Profil Düzenle";
+}
+
+<div class="container mt-5">
+    <h2>✏️ Profil Düzenle</h2>
+    <hr />
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">👨‍🏫 Trainer Bilgilerini Güncelle</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="EditProfile" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <strong>Ad Soyad</strong>
+                            </label>
+                            <input type="text" class="form-control"
+                                   value="@Model.User.FirstName @Model.User.LastName"
+                                   readonly disabled />
+                            <small class="text-muted">Ad soyad değiştirilemez.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <strong>Email</strong>
+                            </label>
+                            <input type="email" class="form-control"
+                                   value="@Model.User.Email"
+                                   readonly disabled />
+                            <small class="text-muted">Email değiştirilemez.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Specialization" class="form-label">
+                                <strong>🎯 Uzmanlık Alanı</strong> <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Specialization" class="form-control"
+                                   placeholder="Fitness, Yoga, Pilates..."
+                                   required maxlength="200" />
+                            <span asp-validation-for="Specialization" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Bio" class="form-label">
+                                <strong>📝 Hakkınızda</strong>
+                            </label>
+                            <textarea asp-for="Bio" class="form-control" rows="5"
+                                      placeholder="Kendinizi tanıtın..."
+                                      maxlength="1000"></textarea>
+                            <span asp-validation-for="Bio" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ExperienceYears" class="form-label">
+                                <strong>📅 Deneyim (Yıl)</strong>
+                            </label>
+                            <input asp-for="ExperienceYears" type="number" class="form-control"
+                                   min="0" max="50" />
+                            <span asp-validation-for="ExperienceYears" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="IsAvailable" class="form-label">
+                                <strong>🟢 Müsaitlik Durumu</strong>
+                            </label>
+                            <select asp-for="IsAvailable" class="form-select">
+                                <option value="true">✅ Müsait (Üyeler randevu alabilir)</option>
+                                <option value="false">❌ Müsait Değil (Randevu alınamaz)</option>
+                            </select>
+                            <small class="text-muted">Tatil veya izindeyseniz "Müsait Değil" seçin.</small>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <strong>⚠️ Not:</strong>
+                            <ul class="mb-0">
+                                <li>Salon bilgisi değiştirilemez (Admin değiştirir)</li>
+                                <li>Profil fotoğrafı şu an eklenemez (İleride eklenecek)</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                💾 Kaydet
+                            </button>
+                            <a asp-action="Profile" class="btn btn-secondary">
+                                ❌ İptal
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

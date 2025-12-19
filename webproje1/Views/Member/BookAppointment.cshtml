@@ -1,0 +1,118 @@
+﻿@model webproje1.Models.Appointment
+
+@{
+    ViewData["Title"] = "Randevu Al";
+    var trainers = ViewBag.Trainers as List<webproje1.Models.Trainer>;
+    var services = ViewBag.Services as List<webproje1.Models.Service>;
+}
+
+<div class="container mt-5">
+    <h2>📅 Randevu Al</h2>
+    <hr />
+
+    @if (trainers == null || !trainers.Any())
+    {
+        <div class="alert alert-warning">
+            <h5>⚠️ Henüz antrenör bulunmamaktadır!</h5>
+            <p>Randevu alabilmek için sistemde antrenör olması gerekmektedir.</p>
+            <a asp-action="Index" class="btn btn-secondary">← Geri Dön</a>
+        </div>
+    }
+    else if (services == null || !services.Any())
+    {
+        <div class="alert alert-warning">
+            <h5>⚠️ Henüz hizmet bulunmamaktadır!</h5>
+            <p>Randevu alabilmek için sistemde hizmet olması gerekmektedir.</p>
+            <a asp-action="Index" class="btn btn-secondary">← Geri Dön</a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <form asp-action="BookAppointment" method="post">
+                            <div class="mb-3">
+                                <label class="form-label">👨‍🏫 Antrenör Seçin</label>
+                                <select asp-for="TrainerId" class="form-select" required>
+                                    <option value="">-- Antrenör Seçin --</option>
+                                    @foreach (var trainer in trainers)
+                                    {
+                                        <option value="@trainer.Id">
+                                            @trainer.User.FirstName @trainer.User.LastName - @trainer.Specialization
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">🏋️ Hizmet Seçin</label>
+                                <select asp-for="ServiceId" class="form-select" required>
+                                    <option value="">-- Hizmet Seçin --</option>
+                                    @foreach (var service in services)
+                                    {
+                                        <option value="@service.Id">
+                                            @service.Name - @service.DurationMinutes dk - @service.Price ₺
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">📆 Tarih</label>
+                                <input asp-for="AppointmentDate" type="date" class="form-control"
+                                       min="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">⏰ Başlangıç</label>
+                                    <input asp-for="StartTime" type="time" class="form-control" required />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">⏰ Bitiş</label>
+                                    <input asp-for="EndTime" type="time" class="form-control" required />
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">💰 Fiyat (₺)</label>
+                                <input asp-for="TotalPrice" type="number" step="0.01" class="form-control"
+                                       placeholder="Fiyat giriniz" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">📝 Notlar (Opsiyonel)</label>
+                                <textarea asp-for="Notes" class="form-control" rows="3"
+                                          placeholder="Varsa eklemek istediğiniz notları yazınız..."></textarea>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success btn-lg">✅ Randevu Oluştur</button>
+                                <a asp-action="Index" class="btn btn-secondary">❌ İptal</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h5>ℹ️ Bilgilendirme</h5>
+                        <ul>
+                            <li>Randevunuz oluşturulduktan sonra <strong>onay bekleyecektir</strong>.</li>
+                            <li>Antrenör randevunuzu onayladıktan sonra kesinleşecektir.</li>
+                            <li>Randevularınızı <strong>"Randevularım"</strong> bölümünden takip edebilirsiniz.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
