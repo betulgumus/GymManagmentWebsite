@@ -413,5 +413,10 @@ namespace webproje1.Controllers
             await _context.TrainerServices.AddRangeAsync(toAdd);
             await _context.SaveChangesAsync();
         }
+        // Randevu Raporu
+        public IActionResult AppointmentReport()
+        {
+            return View();
+        }
     }
 }

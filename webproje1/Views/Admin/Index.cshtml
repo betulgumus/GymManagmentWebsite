@@ -58,23 +58,23 @@
                class="btn btn-outline-primary">
                 👨‍🏫 Antrenör Yönetimi
             </a>
-
             <a asp-action="Services"
                class="btn btn-outline-success">
                 🏋️ Hizmet Yönetimi
             </a>
-
             <a asp-action="Members"
                class="btn btn-outline-info">
                 👥 Üye Yönetimi
             </a>
-
             <a asp-action="Appointments"
                class="btn btn-outline-warning">
                 📅 Randevu Yönetimi
             </a>
+            <a asp-action="AppointmentReport"
+               class="btn btn-outline-secondary">
+                📊 Randevu Raporu (REST API)
+            </a>
         </div>
-
         <form asp-controller="Account"
               asp-action="Logout"
               method="post">
