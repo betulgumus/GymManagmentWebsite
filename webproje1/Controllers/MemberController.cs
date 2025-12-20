@@ -15,49 +15,127 @@ namespace webproje1.Controllers
 
         public MemberController(
             ApplicationDbContext context,
-            UserManager<ApplicationUser> userManager) //b
+            UserManager<ApplicationUser> userManager)
         {
             _context = context;
-            _userManager = userManager;    
+            _userManager = userManager;
         }
 
-        // Ana Sayfa
+        // ============================
+        // DASHBOARD
+        // ============================
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
-            var memberProfile = await _context.MemberProfiles
+
+            var profile = await _context.MemberProfiles
                 .FirstOrDefaultAsync(m => m.UserId == user.Id);
 
-            ViewBag.MemberName = $"{memberProfile?.FirstName} {memberProfile?.LastName}";
+            ViewBag.MemberName = $"{profile?.FirstName} {profile?.LastName}";
             ViewBag.Email = user.Email;
 
-            return View();
+            return View("Index");
         }
 
-        // Antrenörler Listesi
-        public async Task<IActionResult> Trainers()
-        {
-            var trainers = await _context.Trainers
-                .Include(t => t.User)
-                .Include(t => t.GymCenter)
-                .Where(t => t.IsAvailable)
-                .ToListAsync();
-
-            return View(trainers);
-        }
-
-        // Hizmetler Listesi
-        public async Task<IActionResult> Services()
+        // ============================
+        // 1️⃣ HİZMET SEÇ
+        // ============================
+        public async Task<IActionResult> SelectService()
         {
             var services = await _context.Services
-                .Include(s => s.GymCenter)
                 .Where(s => s.IsActive)
                 .ToListAsync();
 
-            return View(services);
+            return View("SelectService", services);
         }
 
-        // Randevularım
+        // ============================
+        // 2️⃣ TRAINER SEÇ
+        // ============================
+        public async Task<IActionResult> SelectTrainer(int serviceId)
+        {
+            if (serviceId == 0)
+                return RedirectToAction(nameof(SelectService));
+
+            var trainers = await _context.TrainerServices
+                .Include(ts => ts.Trainer)
+                    .ThenInclude(t => t.User)
+                .Where(ts => ts.ServiceId == serviceId)
+                .Select(ts => ts.Trainer)
+                .Distinct()
+                .ToListAsync();
+
+            ViewBag.ServiceId = serviceId;
+
+            return View("SelectTrainer", trainers);
+        }
+
+        // ============================
+        // 3️⃣ TARİH & SAAT SEÇ
+        // ============================
+        public async Task<IActionResult> SelectDateTime(int trainerId, int serviceId)
+        {
+            if (trainerId == 0 || serviceId == 0)
+                return RedirectToAction(nameof(SelectService));
+
+            var availabilities = await _context.TrainerAvailabilities
+                .Where(a =>
+                    a.TrainerId == trainerId &&
+                    a.IsActive &&
+                    a.AvailableDate >= DateTime.Today)
+                .OrderBy(a => a.AvailableDate)
+                .ThenBy(a => a.StartTime)
+                .ToListAsync();
+
+            ViewBag.TrainerId = trainerId;
+            ViewBag.ServiceId = serviceId;
+
+            return View("SelectDateTime", availabilities);
+        }
+
+        // ============================
+        // 4️⃣ RANDEVU OLUŞTUR
+        // ============================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateAppointment(
+            int trainerId,
+            int serviceId,
+            DateTime availableDate,
+            TimeSpan startTime)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var service = await _context.Services.FindAsync(serviceId);
+
+            if (service == null)
+                return RedirectToAction(nameof(SelectService));
+
+            var gym = await _context.GymCenters.FirstAsync();
+
+            var appointment = new Appointment
+            {
+                MemberId = user.Id,
+                TrainerId = trainerId,
+                ServiceId = serviceId,
+                GymCenterId = gym.Id,
+                AppointmentDate = availableDate,
+                StartTime = startTime,
+                EndTime = startTime.Add(TimeSpan.FromMinutes(service.DurationMinutes)),
+                TotalPrice = service.Price,
+                Status = AppointmentStatus.Pending,
+                CreatedDate = DateTime.Now
+            };
+
+            _context.Appointments.Add(appointment);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "✅ Randevu talebiniz oluşturuldu!";
+            return RedirectToAction(nameof(MyAppointments));
+        }
+
+        // ============================
+        // RANDEVULARIM
+        // ============================
         public async Task<IActionResult> MyAppointments()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -71,108 +149,57 @@ namespace webproje1.Controllers
                 .OrderByDescending(a => a.AppointmentDate)
                 .ToListAsync();
 
-            return View(appointments);
+            return View("MyAppointments", appointments);
         }
 
-        // Randevu Al - GET
-        public async Task<IActionResult> BookAppointment()
-        {
-            ViewBag.Trainers = await _context.Trainers
-                .Include(t => t.User)
-                .Where(t => t.IsAvailable)
-                .ToListAsync();
-
-            ViewBag.Services = await _context.Services
-                .Where(s => s.IsActive)
-                .ToListAsync();
-
-
-
-            return View();
-        }
-
-        // Randevu Al - POST
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> BookAppointment(Appointment model)
-        {
-            var user = await _userManager.GetUserAsync(User);
-
-            // İlk (veya tek) GymCenter'ı otomatik al
-            var defaultGymCenter = await _context.GymCenters.FirstOrDefaultAsync();
-
-            if (defaultGymCenter == null)
-            {
-                TempData["Error"] = "Spor salonu bulunamadı!";
-                return RedirectToAction("Index");
-            }
-
-            model.MemberId = user.Id;
-            model.GymCenterId = defaultGymCenter.Id;  // ← Otomatik ata!
-            model.Status = AppointmentStatus.Pending;
-            model.CreatedDate = DateTime.Now;
-
-            _context.Appointments.Add(model);
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Randevunuz başarıyla oluşturuldu!";
-            return RedirectToAction("MyAppointments");
-        }
-
-        // Profilim
+        // ============================
+        // PROFİL
+        // ============================
         public async Task<IActionResult> Profile()
         {
             var user = await _userManager.GetUserAsync(User);
-            var memberProfile = await _context.MemberProfiles
+
+            var profile = await _context.MemberProfiles
                 .FirstOrDefaultAsync(m => m.UserId == user.Id);
 
-            return View(memberProfile);
+            return View("Profile", profile);
         }
-        // Profil Düzenle - GET
+
+        // ============================
+        // PROFİL DÜZENLE
+        // ============================
         public async Task<IActionResult> EditProfile()
         {
             var user = await _userManager.GetUserAsync(User);
-            var memberProfile = await _context.MemberProfiles
+
+            var profile = await _context.MemberProfiles
                 .FirstOrDefaultAsync(m => m.UserId == user.Id);
 
-            if (memberProfile == null)
-            {
-                TempData["Error"] = "Profil bulunamadı!";
-                return RedirectToAction("Index");
-            }
-
-            return View(memberProfile);
+            return View("EditProfile", profile);
         }
 
-        // Profil Düzenle - POST
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditProfile(MemberProfile model)
         {
             var user = await _userManager.GetUserAsync(User);
-            var memberProfile = await _context.MemberProfiles
+
+            var profile = await _context.MemberProfiles
                 .FirstOrDefaultAsync(m => m.UserId == user.Id);
 
-            if (memberProfile == null)
-            {
-                TempData["Error"] = "Profil bulunamadı!";
-                return RedirectToAction("Index");
-            }
-
-            // Güncellenebilir alanlar
-            memberProfile.FirstName = model.FirstName;
-            memberProfile.LastName = model.LastName;
-            memberProfile.DateOfBirth = model.DateOfBirth;
-            memberProfile.Height = model.Height;
-            memberProfile.Weight = model.Weight;
-            memberProfile.BodyType = model.BodyType;
-            memberProfile.FitnessGoal = model.FitnessGoal;
-            memberProfile.HealthConditions = model.HealthConditions;
+            profile.FirstName = model.FirstName;
+            profile.LastName = model.LastName;
+            profile.DateOfBirth = model.DateOfBirth;
+            profile.Height = model.Height;
+            profile.Weight = model.Weight;
+            profile.BodyType = model.BodyType;
+            profile.FitnessGoal = model.FitnessGoal;
+            profile.HealthConditions = model.HealthConditions;
 
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = "Profiliniz başarıyla güncellendi!";
-            return RedirectToAction("Profile");
+            TempData["Success"] = "Profil güncellendi.";
+            return RedirectToAction(nameof(Profile));
         }
     }
 }

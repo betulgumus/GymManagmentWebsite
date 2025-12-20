@@ -7,7 +7,7 @@
         <div class="col-md-8">
             <div class="alert alert-warning">
                 <h4>⚠️ Trainer Profiliniz Henüz Oluşturulmamış!</h4>
-                <p>Aşağıdaki formu doldurarark trainer profilinizi oluşturabilirsiniz.</p>
+                <p>Aşağıdaki formu doldurarak trainer profilinizi oluşturabilirsiniz.</p>
             </div>
 
             @if (TempData["Error"] != null)
@@ -24,59 +24,162 @@
                 </div>
                 <div class="card-body">
                     <form asp-action="CreateProfile" method="post">
-                        <div class="mb-3">
-                            <label for="Specialization" class="form-label">
-                                <strong>🎯 Uzmanlık Alanı</strong> <span class="text-danger">*</span>
+                        
+                        <!-- Hizmet Seçimi (Checkbox) -->
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <strong>🎯 Verdiğiniz Hizmetler</strong> <span class="text-danger">*</span>
                             </label>
-                            <input type="text"
-                                   name="Specialization"
-                                   id="Specialization"
-                                   class="form-control"
-                                   placeholder="Örn: Fitness ve Güç Antrenmanı, Yoga, Pilates..."
-                                   required
-                                   maxlength="200" />
-                            <small class="text-muted">Hangi konularda uzmanınız?</small>
+                            <small class="text-muted d-block mb-2">
+                                Hangi hizmetleri veriyorsunuz? (Birden fazla seçebilirsiniz)
+                            </small>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="ServiceTypes" value="0" id="fitness">
+                                        <label class="form-check-label" for="fitness">
+                                            🏋️ <strong>Fitness</strong>
+                                            <small class="text-muted d-block">Genel fitness antrenmanı</small>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="ServiceTypes" value="1" id="yoga">
+                                        <label class="form-check-label" for="yoga">
+                                            🧘 <strong>Yoga</strong>
+                                            <small class="text-muted d-block">Yoga dersleri</small>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="ServiceTypes" value="2" id="pilates">
+                                        <label class="form-check-label" for="pilates">
+                                            🤸 <strong>Pilates</strong>
+                                            <small class="text-muted d-block">Pilates antrenmanı</small>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="ServiceTypes" value="3" id="personal">
+                                        <label class="form-check-label" for="personal">
+                                            👤 <strong>Personal Training</strong>
+                                            <small class="text-muted d-block">Kişiye özel antrenman</small>
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="ServiceTypes" value="4" id="group">
+                                        <label class="form-check-label" for="group">
+                                            👥 <strong>Group Training</strong>
+                                            <small class="text-muted d-block">Grup antrenmanları</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="ServiceTypes" value="5" id="cardio">
+                                        <label class="form-check-label" for="cardio">
+                                            ❤️ <strong>Cardio</strong>
+                                            <small class="text-muted d-block">Kardiyovasküler egzersizler</small>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="ServiceTypes" value="6" id="zumba">
+                                        <label class="form-check-label" for="zumba">
+                                            💃 <strong>Zumba</strong>
+                                            <small class="text-muted d-block">Dans ve fitness</small>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="ServiceTypes" value="7" id="spinning">
+                                        <label class="form-check-label" for="spinning">
+                                            🚴 <strong>Spinning</strong>
+                                            <small class="text-muted d-block">Bisiklet antrenmanı</small>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="ServiceTypes" value="8" id="crossfit">
+                                        <label class="form-check-label" for="crossfit">
+                                            🏃 <strong>CrossFit</strong>
+                                            <small class="text-muted d-block">Yüksek yoğunluklu antrenman</small>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="ServiceTypes" value="9" id="boxing">
+                                        <label class="form-check-label" for="boxing">
+                                            🥊 <strong>Boxing</strong>
+                                            <small class="text-muted d-block">Boks antrenmanı</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <small class="text-danger d-block mt-2" id="serviceError" style="display:none;">
+                                ⚠️ En az bir hizmet seçmelisiniz!
+                            </small>
                         </div>
 
+                        <!-- Özel Açıklama (Opsiyonel) -->
                         <div class="mb-3">
-                            <label for="Bio" class="form-label">
-                                <strong>📝 Hakkınızda</strong>
+                            <label class="form-label">
+                                <strong>📝 Uzmanlık Açıklaması (Opsiyonel)</strong>
                             </label>
-                            <textarea name="Bio"
-                                      id="Bio"
-                                      class="form-control"
-                                      rows="4"
-                                      placeholder="Kendinizi tanıtın, eğitim geçmişiniz, sertifikalarınız..."
+                            <input type="text" 
+                                   name="Specialization" 
+                                   class="form-control" 
+                                   placeholder="Örn: 10 yıllık tecrübe, sertifikalı fitness eğitmeni" 
+                                   maxlength="200" />
+                            <small class="text-muted">Yukarıda seçtiğiniz hizmetler dışında eklemek istediğiniz özel açıklama</small>
+                        </div>
+
+                        <!-- Hakkınızda -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <strong>📋 Hakkınızda</strong>
+                            </label>
+                            <textarea name="Bio" 
+                                      class="form-control" 
+                                      rows="4" 
+                                      placeholder="Kendinizi tanıtın, eğitim geçmişiniz, sertifikalarınız..." 
                                       maxlength="1000"></textarea>
                             <small class="text-muted">Üyeler sizi buradan tanıyacak. (Opsiyonel)</small>
                         </div>
 
+                        <!-- Deneyim -->
                         <div class="mb-3">
-                            <label for="ExperienceYears" class="form-label">
+                            <label class="form-label">
                                 <strong>📅 Deneyim (Yıl)</strong>
                             </label>
-                            <input type="number"
-                                   name="ExperienceYears"
-                                   id="ExperienceYears"
-                                   class="form-control"
-                                   placeholder="Kaç yıldır antrenörsünüz?"
-                                   min="0"
-                                   max="50"
+                            <input type="number" 
+                                   name="ExperienceYears" 
+                                   class="form-control" 
+                                   placeholder="Kaç yıldır antrenörsünüz?" 
+                                   min="0" 
+                                   max="50" 
                                    value="0" />
                             <small class="text-muted">0 girebilirsiniz.</small>
                         </div>
 
+                        <!-- Bilgilendirme -->
                         <div class="alert alert-info">
                             <strong>ℹ️ Bilgilendirme:</strong>
                             <ul class="mb-0">
+                                <li>Seçtiğiniz hizmetler otomatik olarak sisteme eklenecektir</li>
                                 <li>Profiliniz oluşturulduktan sonra düzenleyebilirsiniz</li>
-                                <li>Üyeler profilinizi görebilir ve randevu alabilir</li>
-                                <li>Fotoğrafınızı daha sonra profil sayfasından yükleyebilirsiniz</li>
+                                <li>Üyeler sadece seçtiğiniz hizmetler için randevu alabilir</li>
+                                <li>Müsaitlik saatlerinizi daha sonra ekleyebilirsiniz</li>
                             </ul>
                         </div>
 
+                        <!-- Butonlar -->
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
                                 ✅ Profili Oluştur
                             </button>
                         </div>
@@ -96,5 +199,19 @@
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Form submit kontrolü
+        document.getElementById('submitBtn').addEventListener('click', function(e) {
+            var checkboxes = document.querySelectorAll('input[name="ServiceTypes"]:checked');
+            var errorMsg = document.getElementById('serviceError');
+            
+            if (checkboxes.length === 0) {
+                e.preventDefault();
+                errorMsg.style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                errorMsg.style.display = 'none';
+            }
+        });
+    </script>
 }

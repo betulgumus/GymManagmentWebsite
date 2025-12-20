@@ -21,67 +21,249 @@ namespace webproje1.Controllers
             _userManager = userManager;
         }
 
-        // Ana Sayfa
+        // ============================
+        // DASHBOARD
+        // ============================
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
+
             var trainer = await _context.Trainers
                 .Include(t => t.User)
                 .Include(t => t.GymCenter)
                 .FirstOrDefaultAsync(t => t.UserId == user.Id);
 
             if (trainer == null)
-            {
                 return View("NoTrainerProfile");
-            }
 
-            // İstatistikler
-            var totalAppointments = await _context.Appointments
-                .Where(a => a.TrainerId == trainer.Id)
-                .CountAsync();
+            ViewBag.TotalAppointments = await _context.Appointments
+                .CountAsync(a => a.TrainerId == trainer.Id);
 
-            var pendingAppointments = await _context.Appointments
-                .Where(a => a.TrainerId == trainer.Id && a.Status == AppointmentStatus.Pending)
-                .CountAsync();
+            ViewBag.PendingAppointments = await _context.Appointments
+                .CountAsync(a => a.TrainerId == trainer.Id && a.Status == AppointmentStatus.Pending);
 
-            var todayAppointments = await _context.Appointments
-                .Where(a => a.TrainerId == trainer.Id && a.AppointmentDate.Date == DateTime.Today)
-                .CountAsync();
+            ViewBag.TodayAppointments = await _context.Appointments
+                .CountAsync(a => a.TrainerId == trainer.Id &&
+                                 a.AppointmentDate.Date == DateTime.Today);
 
             ViewBag.TrainerName = $"{trainer.User.FirstName} {trainer.User.LastName}";
             ViewBag.Specialization = trainer.Specialization;
-            ViewBag.TotalAppointments = totalAppointments;
-            ViewBag.PendingAppointments = pendingAppointments;
-            ViewBag.TodayAppointments = todayAppointments;
 
             return View(trainer);
         }
 
-        // Randevularım
-        public async Task<IActionResult> MyAppointments()
+        // ============================
+        // PROFİL OLUŞTUR (GET)
+        // ============================
+        [HttpGet]
+        public IActionResult CreateProfile()
+        {
+            return View();
+        }
+
+        // ============================
+        // PROFİL OLUŞTUR (POST)
+        // ============================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateProfile(
+            string Specialization,
+            string Bio,
+            int ExperienceYears,
+            List<int> ServiceTypes)
         {
             var user = await _userManager.GetUserAsync(User);
+
+            if (ServiceTypes == null || !ServiceTypes.Any())
+            {
+                TempData["Error"] = "En az bir hizmet seçmelisiniz.";
+                return RedirectToAction(nameof(CreateProfile));
+            }
+
+            // Varsayılan salon
+            var gym = await _context.GymCenters.FirstOrDefaultAsync();
+            if (gym == null)
+            {
+                gym = new GymCenter
+                {
+                    Name = "FitZone Merkez",
+                    Address = "Merkez",
+                    PhoneNumber = "0000000000",
+                    Email = "info@fitzone.com",
+                    OpeningTime = new TimeSpan(8, 0, 0),
+                    ClosingTime = new TimeSpan(22, 0, 0),
+                    IsActive = true
+                };
+                _context.GymCenters.Add(gym);
+                await _context.SaveChangesAsync();
+            }
+
+            var trainer = new Trainer
+            {
+                UserId = user.Id,
+                GymCenterId = gym.Id,
+                Specialization = Specialization,
+                Bio = Bio,
+                ExperienceYears = ExperienceYears,
+                IsAvailable = true
+            };
+
+            _context.Trainers.Add(trainer);
+            await _context.SaveChangesAsync();
+
+            // Hizmetler
+            foreach (var serviceTypeValue in ServiceTypes)
+            {
+                var serviceType = (ServiceType)serviceTypeValue;
+
+                var service = await _context.Services
+                    .FirstOrDefaultAsync(s => s.ServiceType == serviceType);
+
+                if (service == null)
+                {
+                    service = new Service
+                    {
+                        Name = serviceType.ToString(),
+                        ServiceType = serviceType,
+                        GymCenterId = gym.Id,
+                        Price = 100,
+                        DurationMinutes = 60,
+                        IsActive = true
+                    };
+                    _context.Services.Add(service);
+                    await _context.SaveChangesAsync();
+                }
+
+                _context.TrainerServices.Add(new TrainerService
+                {
+                    TrainerId = trainer.Id,
+                    ServiceId = service.Id
+                });
+            }
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Trainer profiliniz oluşturuldu.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // ============================
+        // MÜSAİTLİK LİSTESİ
+        // ============================
+        public async Task<IActionResult> Availability()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
             var trainer = await _context.Trainers
                 .FirstOrDefaultAsync(t => t.UserId == user.Id);
 
             if (trainer == null)
-            {
                 return View("NoTrainerProfile");
+
+            var availabilities = await _context.TrainerAvailabilities
+                .Where(a => a.TrainerId == trainer.Id)
+                .OrderBy(a => a.AvailableDate)
+                .ThenBy(a => a.StartTime)
+                .ToListAsync();
+
+            return View(availabilities);
+        }
+
+        // ============================
+        // MÜSAİTLİK EKLE (GET)
+        // ============================
+        public async Task<IActionResult> AddAvailability()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            var trainer = await _context.Trainers
+                .FirstOrDefaultAsync(t => t.UserId == user.Id);
+
+            if (trainer == null)
+                return View("NoTrainerProfile");
+
+            return View();
+        }
+
+        // ============================
+        // MÜSAİTLİK EKLE (POST)
+        // ============================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddAvailability(TrainerAvailability model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            var trainer = await _context.Trainers
+                .FirstOrDefaultAsync(t => t.UserId == user.Id);
+
+            if (trainer == null)
+                return View("NoTrainerProfile");
+
+            bool isDuplicate = await _context.TrainerAvailabilities.AnyAsync(a =>
+                a.TrainerId == trainer.Id &&
+                a.AvailableDate == model.AvailableDate &&
+                a.StartTime == model.StartTime);
+
+            if (isDuplicate)
+            {
+                ModelState.AddModelError("", "Bu tarih ve saat için zaten müsaitlik eklenmiş.");
+                return View(model);
             }
+
+            model.TrainerId = trainer.Id;
+            model.IsActive = true;
+
+            _context.TrainerAvailabilities.Add(model);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Müsaitlik eklendi.";
+            return RedirectToAction(nameof(Availability));
+        }
+
+        // ============================
+        // MÜSAİTLİK SİL
+        // ============================
+        [HttpPost]
+        public async Task<IActionResult> DeleteAvailability(int id)
+        {
+            var availability = await _context.TrainerAvailabilities.FindAsync(id);
+
+            if (availability != null)
+            {
+                _context.TrainerAvailabilities.Remove(availability);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Availability));
+        }
+
+        // ============================
+        // RANDEVULARIM
+        // ============================
+        public async Task<IActionResult> MyAppointments()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            var trainer = await _context.Trainers
+                .FirstOrDefaultAsync(t => t.UserId == user.Id);
+
+            if (trainer == null)
+                return View("NoTrainerProfile");
 
             var appointments = await _context.Appointments
                 .Include(a => a.Member)
                 .Include(a => a.Service)
-                .Include(a => a.GymCenter)
                 .Where(a => a.TrainerId == trainer.Id)
                 .OrderByDescending(a => a.AppointmentDate)
-                .ThenBy(a => a.StartTime)
                 .ToListAsync();
 
             return View(appointments);
         }
 
-        // Randevu Onayla
+        // ============================
+        // RANDEVU ONAYLA
+        // ============================
         [HttpPost]
         public async Task<IActionResult> ApproveAppointment(int id)
         {
@@ -92,13 +274,14 @@ namespace webproje1.Controllers
                 appointment.Status = AppointmentStatus.Confirmed;
                 appointment.ConfirmedDate = DateTime.Now;
                 await _context.SaveChangesAsync();
-                TempData["Success"] = "Randevu onaylandı!";
             }
 
-            return RedirectToAction("MyAppointments");
+            return RedirectToAction(nameof(MyAppointments));
         }
 
-        // Randevu Reddet
+        // ============================
+        // RANDEVU REDDET
+        // ============================
         [HttpPost]
         public async Task<IActionResult> RejectAppointment(int id)
         {
@@ -108,204 +291,29 @@ namespace webproje1.Controllers
             {
                 appointment.Status = AppointmentStatus.Cancelled;
                 await _context.SaveChangesAsync();
-                TempData["Success"] = "Randevu reddedildi!";
             }
 
-            return RedirectToAction("MyAppointments");
+            return RedirectToAction(nameof(MyAppointments));
         }
 
-        // Müsaitlik Ayarları
-        public async Task<IActionResult> Availability()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            var trainer = await _context.Trainers
-                .FirstOrDefaultAsync(t => t.UserId == user.Id);
-
-            if (trainer == null)
-            {
-                return View("NoTrainerProfile");
-            }
-
-            var availabilities = await _context.TrainerAvailabilities
-                .Where(a => a.TrainerId == trainer.Id)
-                .OrderBy(a => a.DayOfWeek)
-                .ThenBy(a => a.StartTime)
-                .ToListAsync();
-
-            ViewBag.TrainerId = trainer.Id;
-
-            return View(availabilities);
-        }
-
-        // Müsaitlik Ekle - GET
-        public async Task<IActionResult> AddAvailability()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            var trainer = await _context.Trainers
-                .FirstOrDefaultAsync(t => t.UserId == user.Id);
-
-            if (trainer == null)
-            {
-                return View("NoTrainerProfile");
-            }
-
-            ViewBag.TrainerId = trainer.Id;
-            return View();
-        }
-
-        // Müsaitlik Ekle - POST
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddAvailability(TrainerAvailability model)
-        {
-            var user = await _userManager.GetUserAsync(User);
-            var trainer = await _context.Trainers
-                .FirstOrDefaultAsync(t => t.UserId == user.Id);
-
-            if (trainer == null)
-            {
-                return View("NoTrainerProfile");
-            }
-
-            model.TrainerId = trainer.Id;
-            model.IsActive = true;
-
-            _context.TrainerAvailabilities.Add(model);
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Müsaitlik başarıyla eklendi!";
-            return RedirectToAction("Availability");
-        }
-
-        // Müsaitlik Sil
-        [HttpPost]
-        public async Task<IActionResult> DeleteAvailability(int id)
-        {
-            var availability = await _context.TrainerAvailabilities.FindAsync(id);
-
-            if (availability != null)
-            {
-                _context.TrainerAvailabilities.Remove(availability);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Müsaitlik silindi!";
-            }
-
-            return RedirectToAction("Availability");
-        }
-
-        // Profilim
+        // ============================
+        // PROFİL GÖRÜNTÜLE
+        // ============================
         public async Task<IActionResult> Profile()
         {
             var user = await _userManager.GetUserAsync(User);
+
             var trainer = await _context.Trainers
                 .Include(t => t.User)
                 .Include(t => t.GymCenter)
+                .Include(t => t.TrainerServices)
+                    .ThenInclude(ts => ts.Service)
                 .FirstOrDefaultAsync(t => t.UserId == user.Id);
 
             if (trainer == null)
-            {
                 return View("NoTrainerProfile");
-            }
 
             return View(trainer);
-        }
-
-        // Profil Düzenle - GET
-        public async Task<IActionResult> EditProfile()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            var trainer = await _context.Trainers
-                .FirstOrDefaultAsync(t => t.UserId == user.Id);
-
-            if (trainer == null)
-            {
-                return View("NoTrainerProfile");
-            }
-
-            return View(trainer);
-        }
-
-        // Profil Düzenle - POST
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditProfile(Trainer model)
-        {
-            var user = await _userManager.GetUserAsync(User);
-            var trainer = await _context.Trainers
-                .FirstOrDefaultAsync(t => t.UserId == user.Id);
-
-            if (trainer == null)
-            {
-                return View("NoTrainerProfile");
-            }
-
-            // Güncellenebilir alanlar
-            trainer.Specialization = model.Specialization;
-            trainer.Bio = model.Bio;
-            trainer.ExperienceYears = model.ExperienceYears;
-            trainer.IsAvailable = model.IsAvailable;
-
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Profiliniz başarıyla güncellendi!";
-            return RedirectToAction("Profile");
-        }
-        // Profil Oluştur - POST
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateProfile(string Specialization, string Bio, int ExperienceYears)
-        {
-            var user = await _userManager.GetUserAsync(User);
-
-            // Zaten profil var mı kontrol et
-            var existingTrainer = await _context.Trainers
-                .FirstOrDefaultAsync(t => t.UserId == user.Id);
-
-            if (existingTrainer != null)
-            {
-                TempData["Error"] = "Zaten bir trainer profiliniz var!";
-                return RedirectToAction("Index");
-            }
-
-            // İlk GymCenter'ı al (tek salon var)
-            var defaultGym = await _context.GymCenters.FirstOrDefaultAsync();
-
-            // Eğer GymCenter yoksa otomatik oluştur!
-            if (defaultGym == null)
-            {
-                defaultGym = new GymCenter
-                {
-                    Name = "FitZone Merkez",
-                    Address = "Serdivan, Sakarya",
-                    PhoneNumber = "0264 123 4567",
-                    Email = "info@fitzone.com",
-                    OpeningTime = new TimeSpan(6, 0, 0),  // 06:00
-                    ClosingTime = new TimeSpan(23, 0, 0), // 23:00
-                    Description = "Ana spor salonumuz",
-                    IsActive = true
-                };
-
-                _context.GymCenters.Add(defaultGym);
-                await _context.SaveChangesAsync();
-            }
-
-            // Yeni Trainer profili oluştur
-            var trainer = new Trainer
-            {
-                UserId = user.Id,
-                GymCenterId = defaultGym.Id,
-                Specialization = Specialization ?? "Genel Antrenör",
-                Bio = Bio,
-                ExperienceYears = ExperienceYears,
-                IsAvailable = true,
-                PhotoUrl = null
-            };
-
-            _context.Trainers.Add(trainer);
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "🎉 Trainer profiliniz başarıyla oluşturuldu!";
-            return RedirectToAction("Index");
         }
     }
 }

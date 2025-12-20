@@ -1,0 +1,54 @@
+﻿@model List<webproje1.Models.Trainer>
+
+@{
+    ViewData["Title"] = "Antrenör Seç";
+    var serviceId = ViewBag.ServiceId;
+}
+
+<div class="container mt-5">
+    <h2>👨‍🏫 Antrenör Seç</h2>
+    <hr />
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-warning">
+            <p>Bu hizmeti veren antrenör bulunmamaktadır.</p>
+            <a asp-action="SelectService" class="btn btn-secondary">← Geri</a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var trainer in Model)
+            {
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">
+                                @trainer.User.FirstName @trainer.User.LastName
+                            </h5>
+
+                            <p class="text-muted">
+                                🎯 @trainer.Specialization <br />
+                                🧠 @trainer.ExperienceYears yıl deneyim
+                            </p>
+
+                            <a asp-action="SelectDateTime"
+                               asp-route-trainerId="@trainer.Id"
+                               asp-route-serviceId="@serviceId"
+                               class="btn btn-primary">
+                                📅 Tarih & Saat Seç
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="mt-4">
+        <a asp-action="SelectService" class="btn btn-secondary">
+            ← Hizmetlere Dön
+        </a>
+    </div>
+</div>

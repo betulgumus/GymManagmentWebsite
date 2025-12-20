@@ -1,20 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using webproje1.Models;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace webproje1.Models
 {
-    public enum DayOfWeekEnum
-    {
-        Monday = 1,
-        Tuesday = 2,
-        Wednesday = 3,
-        Thursday = 4,
-        Friday = 5,
-        Saturday = 6,
-        Sunday = 7
-    }
-
     public class TrainerAvailability
     {
         public int Id { get; set; }
@@ -23,7 +11,8 @@ namespace webproje1.Models
         public int TrainerId { get; set; }
 
         [Required]
-        public DayOfWeekEnum DayOfWeek { get; set; }
+        [DataType(DataType.Date)]
+        public DateTime AvailableDate { get; set; }
 
         [Required]
         [DataType(DataType.Time)]
@@ -35,8 +24,6 @@ namespace webproje1.Models
 
         public bool IsActive { get; set; } = true;
 
-        // Navigation Properties
-        [ForeignKey("TrainerId")]
-        public virtual Trainer Trainer { get; set; }
+        public Trainer Trainer { get; set; }
     }
 }

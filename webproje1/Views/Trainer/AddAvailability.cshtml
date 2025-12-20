@@ -7,6 +7,7 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
+
             <h2>➕ Yeni Müsaitlik Ekle</h2>
             <hr />
 
@@ -14,60 +15,59 @@
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0">📅 Çalışma Saati Tanımla</h5>
                 </div>
+
                 <div class="card-body">
+
                     <form asp-action="AddAvailability" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <!-- TARİH -->
                         <div class="mb-3">
-                            <label for="DayOfWeek" class="form-label">
-                                <strong>📆 Gün Seçin</strong> <span class="text-danger">*</span>
+                            <label asp-for="AvailableDate" class="form-label">
+                                <strong>📅 Müsaitlik Tarihi</strong>
+                                <span class="text-danger">*</span>
                             </label>
-                            <select asp-for="DayOfWeek" class="form-select" required>
-                                <option value="">-- Gün Seçin --</option>
-                                <option value="1">Pazartesi</option>
-                                <option value="2">Salı</option>
-                                <option value="3">Çarşamba</option>
-                                <option value="4">Perşembe</option>
-                                <option value="5">Cuma</option>
-                                <option value="6">Cumartesi</option>
-                                <option value="7">Pazar</option>
-                            </select>
-                            <span asp-validation-for="DayOfWeek" class="text-danger"></span>
+                            <input asp-for="AvailableDate"
+                                   type="date"
+                                   class="form-control"
+                                   min="@DateTime.Now.ToString("yyyy-MM-dd")"
+                                   required />
+                            <span asp-validation-for="AvailableDate" class="text-danger"></span>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="StartTime" class="form-label">
-                                    <strong>⏰ Başlangıç Saati</strong> <span class="text-danger">*</span>
+                                <label asp-for="StartTime" class="form-label">
+                                    <strong>⏰ Başlangıç Saati</strong>
                                 </label>
                                 <input asp-for="StartTime" type="time" class="form-control" required />
                                 <span asp-validation-for="StartTime" class="text-danger"></span>
-                                <small class="text-muted">Örn: 09:00</small>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="EndTime" class="form-label">
-                                    <strong>⏰ Bitiş Saati</strong> <span class="text-danger">*</span>
+                                <label asp-for="EndTime" class="form-label">
+                                    <strong>⏰ Bitiş Saati</strong>
                                 </label>
                                 <input asp-for="EndTime" type="time" class="form-control" required />
                                 <span asp-validation-for="EndTime" class="text-danger"></span>
-                                <small class="text-muted">Örn: 18:00</small>
                             </div>
                         </div>
 
                         <div class="alert alert-info">
                             <strong>💡 Örnekler:</strong>
                             <ul class="mb-0">
-                                <li><strong>Sabah vardiyası:</strong> 06:00 - 14:00</li>
-                                <li><strong>Öğlen vardiyası:</strong> 10:00 - 18:00</li>
-                                <li><strong>Akşam vardiyası:</strong> 14:00 - 22:00</li>
-                                <li><strong>Tam gün:</strong> 09:00 - 21:00</li>
+                                <li>Sabah: 06:00 - 14:00</li>
+                                <li>Öğlen: 10:00 - 18:00</li>
+                                <li>Akşam: 14:00 - 22:00</li>
+                                <li>Tam Gün: 09:00 - 21:00</li>
                             </ul>
                         </div>
 
                         <div class="alert alert-warning">
                             <strong>⚠️ Dikkat:</strong>
                             <ul class="mb-0">
-                                <li>Aynı gün için birden fazla müsaitlik ekleyebilirsiniz</li>
-                                <li>Bitiş saati, başlangıç saatinden sonra olmalıdır</li>
+                                <li>Aynı gün için birden fazla saat eklenebilir</li>
+                                <li>Bitiş saati başlangıçtan sonra olmalıdır</li>
                                 <li>Üyeler sadece bu saatlerde randevu alabilir</li>
                             </ul>
                         </div>
@@ -80,7 +80,9 @@
                                 ❌ İptal
                             </a>
                         </div>
+
                     </form>
+
                 </div>
             </div>
         </div>

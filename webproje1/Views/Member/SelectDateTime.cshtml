@@ -1,0 +1,68 @@
+﻿@model List<webproje1.Models.TrainerAvailability>
+
+@{
+    ViewData["Title"] = "Tarih & Saat Seç";
+    var trainerId = ViewBag.TrainerId;
+    var serviceId = ViewBag.ServiceId;
+}
+
+<div class="container mt-5">
+    <h2>📅 Tarih & Saat Seç</h2>
+    <hr />
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-warning">
+            <p>Bu antrenör için ileri tarihli müsaitlik bulunmamaktadır.</p>
+            <a asp-action="SelectTrainer"
+               asp-route-serviceId="@serviceId"
+               class="btn btn-secondary">
+                ← Antrenörlere Dön
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">
+                                📆 @item.AvailableDate.ToString("dd.MM.yyyy")
+                            </h5>
+
+                            <p class="text-muted">
+                                ⏰ @item.StartTime.ToString(@"hh\:mm")
+                                -
+                                @item.EndTime.ToString(@"hh\:mm")
+                            </p>
+
+                            <form asp-action="CreateAppointment" method="post">
+                                @Html.AntiForgeryToken()
+
+                                <input type="hidden" name="trainerId" value="@trainerId" />
+                                <input type="hidden" name="serviceId" value="@serviceId" />
+                                <input type="hidden" name="availableDate" value="@item.AvailableDate.ToString("yyyy-MM-dd")" />
+                                <input type="hidden" name="startTime" value="@item.StartTime" />
+
+                                <button type="submit" class="btn btn-success">
+                                    ✅ Bu Saat İçin Randevu Al
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="mt-4">
+        <a asp-action="SelectTrainer"
+           asp-route-serviceId="@serviceId"
+           class="btn btn-secondary">
+            ← Geri
+        </a>
+    </div>
+</div>
