@@ -2,18 +2,23 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using webproje1.Data;
 using webproje1.Models;
+using webproje1.Options;
+using webproje1.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// DbContext ekle
+// ===========================
+// DATABASE
+// ===========================
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Identity ekle
+// ===========================
+// IDENTITY
+// ===========================
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
-    // ?ifre gereksinimleri
     options.Password.RequireDigit = false;
     options.Password.RequiredLength = 3;
     options.Password.RequireNonAlphanumeric = false;
@@ -23,7 +28,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
-// Cookie ayarlar?
+// ===========================
+// COOKIE AYARLARI
+// ===========================
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
@@ -33,16 +40,34 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
+// ===========================
+// MVC
+// ===========================
 builder.Services.AddControllersWithViews();
+
+// ===========================
+// ?? GROQ AI SERV?S?
+// ===========================
+
+// HttpClient + Service
+builder.Services.AddHttpClient<GroqChatService>();
+
+// Options pattern (appsettings.json)
+builder.Services.Configure<GroqOptions>(
+    builder.Configuration.GetSection("Groq"));
 
 var app = builder.Build();
 
-// Sadece Rolleri Olu?tur (Admin, Member, Trainer)
+// ===========================
+// ROLE SEED (Admin / Member / Trainer)
+// ===========================
 using (var scope = app.Services.CreateScope())
 {
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var roleManager = scope.ServiceProvider
+        .GetRequiredService<RoleManager<IdentityRole>>();
 
     string[] roles = { "Admin", "Member", "Trainer" };
+
     foreach (var role in roles)
     {
         if (!await roleManager.RoleExistsAsync(role))
@@ -52,6 +77,9 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+// ===========================
+// PIPELINE
+// ===========================
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -66,6 +94,9 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// ===========================
+// ROUTING
+// ===========================
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

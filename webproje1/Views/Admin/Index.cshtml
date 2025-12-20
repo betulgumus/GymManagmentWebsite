@@ -1,26 +1,20 @@
-﻿@model List<webproje1.Models.ApplicationUser>
+﻿@model IEnumerable<webproje1.Models.ApplicationUser>
 
 @{
-    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Title"] = "Admin Paneli";
+    var trainerIds = ViewBag.TrainerIds as List<string> ?? new List<string>();
 }
 
 <div class="container mt-5">
-    <div class="alert alert-success">
-        <h4>✅ Hoş Geldiniz Admin!</h4>
-        <p><strong>Email:</strong> @ViewBag.AdminEmail</p>
-        <p><strong>Rol:</strong> Admin</p>
-    </div>
+    <h2>👮 Admin Paneli</h2>
 
-    <hr class="my-4" />
-
-    <h3>👥 Kullanıcılar</h3>
-
-    <table class="table table-bordered mt-3">
-        <thead>
+    <table class="table table-bordered table-striped mt-3 align-middle">
+        <thead class="table-light">
             <tr>
                 <th>Email</th>
-                <th>Rol</th>
-                <th>İşlem</th>
+                <th>Ad</th>
+                <th>Soyad</th>
+                <th>Trainer</th>
             </tr>
         </thead>
         <tbody>
@@ -28,36 +22,29 @@
             {
                 <tr>
                     <td>@user.Email</td>
-                    <td>
-                        @if (user.Email == ViewBag.AdminEmail)
-                        {
-                            <span class="badge bg-danger">Admin</span>
-                        }
-                        else if (((List<string>)ViewBag.TrainerIds).Contains(user.Id))
-                        {
-                            <span class="badge bg-info">Trainer</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-secondary">Member</span>
-                        }
-                    </td>
+                    <td>@user.FirstName</td>
+                    <td>@user.LastName</td>
                     <td>
                         @if (
                        user.Email != ViewBag.AdminEmail &&
-                       !((List<string>)ViewBag.TrainerIds).Contains(user.Id)
+                       !trainerIds.Contains(user.Id)
                        )
                         {
-                            <form asp-action="MakeTrainer" method="post">
+                            <form asp-action="MakeTrainer" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
                                 <input type="hidden" name="userId" value="@user.Id" />
                                 <button type="submit" class="btn btn-warning btn-sm">
                                     Trainer Yap
                                 </button>
                             </form>
                         }
-                        else if (((List<string>)ViewBag.TrainerIds).Contains(user.Id))
+                        else if (trainerIds.Contains(user.Id))
                         {
-                            <span class="text-success">✔</span>
+                            <span class="text-success fw-bold">✔</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">-</span>
                         }
                     </td>
                 </tr>
@@ -66,8 +53,35 @@
     </table>
 
     <div class="mt-5">
-        <form asp-controller="Account" asp-action="Logout" method="post">
-            <button type="submit" class="btn btn-danger">🚪 Çıkış Yap</button>
+        <div class="mb-3 d-flex gap-2 flex-wrap">
+            <a asp-action="Trainers"
+               class="btn btn-outline-primary">
+                👨‍🏫 Antrenör Yönetimi
+            </a>
+
+            <a asp-action="Services"
+               class="btn btn-outline-success">
+                🏋️ Hizmet Yönetimi
+            </a>
+
+            <a asp-action="Members"
+               class="btn btn-outline-info">
+                👥 Üye Yönetimi
+            </a>
+
+            <a asp-action="Appointments"
+               class="btn btn-outline-warning">
+                📅 Randevu Yönetimi
+            </a>
+        </div>
+
+        <form asp-controller="Account"
+              asp-action="Logout"
+              method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-danger">
+                🚪 Çıkış Yap
+            </button>
         </form>
     </div>
 </div>
