@@ -1,0 +1,40 @@
+﻿@model webproje1.Models.Appointment
+
+@{
+    ViewData["Title"] = "Hizmet Seç";
+    var services = ViewBag.Services as List<webproje1.Models.Service>;
+}
+
+<div class="container mt-5">
+    <h2>🏋️ Hizmet Seç</h2>
+    <hr />
+
+    @if (services == null || !services.Any())
+    {
+        <div class="alert alert-warning">
+            <p>Şu anda aktif hizmet bulunmamaktadır.</p>
+            <a asp-action="Index" class="btn btn-secondary">← Geri</a>
+        </div>
+    }
+    else
+    {
+        <form asp-action="SelectTrainer" method="get">
+            <div class="mb-3">
+                <label class="form-label"><strong>Hizmet</strong></label>
+                <select name="serviceId" class="form-select" required>
+                    <option value="">-- Hizmet Seçin --</option>
+                    @foreach (var service in services)
+                    {
+                        <option value="@service.Id">
+                            @service.Name (@service.DurationMinutes dk - @service.Price ₺)
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-success">
+                ➡️ Devam Et
+            </button>
+        </form>
+    }
+</div>

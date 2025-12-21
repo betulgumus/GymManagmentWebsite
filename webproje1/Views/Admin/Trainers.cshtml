@@ -1,0 +1,118 @@
+﻿@model IList<webproje1.Models.Trainer>
+
+@{
+    ViewData["Title"] = "Antrenör Yönetimi";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h2>👨‍🏫 Antrenör Yönetimi</h2>
+        <a asp-action="CreateTrainer"
+           class="btn btn-primary">
+            + Yeni Antrenör
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success mt-3">
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info mt-3">
+            Henüz tanımlı antrenör bulunmamaktadır.
+        </div>
+    }
+    else
+    {
+        <table class="table table-bordered table-striped mt-3 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Ad Soyad</th>
+                    <th>Uzmanlık</th>
+                    <th>Deneyim</th>
+                    <th>Hizmetler</th>
+                    <th>Durum</th>
+                    <th style="width:170px">İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var trainer in Model)
+                {
+                    <tr>
+                        <td>
+                            @(trainer.User != null
+                                ? $"{trainer.User.FirstName} {trainer.User.LastName}"
+                                : "-")
+                        </td>
+
+                        <td>@trainer.Specialization</td>
+
+                        <td>@trainer.ExperienceYears yıl</td>
+
+                        <td>
+                            @if (trainer.TrainerServices != null &&
+                           trainer.TrainerServices.Any())
+                            {
+                                foreach (var ts in trainer.TrainerServices)
+                                {
+                                    <span class="badge bg-info text-dark me-1">
+                                        @ts.Service?.Name
+                                    </span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+
+                        <td>
+                            @if (trainer.IsAvailable)
+                            {
+                                <span class="badge bg-success">Aktif</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Pasif</span>
+                            }
+                        </td>
+
+                        <td class="d-flex gap-2">
+                            <a asp-action="EditTrainer"
+                               asp-route-id="@trainer.Id"
+                               class="btn btn-sm btn-warning">
+                                Düzenle
+                            </a>
+
+                            <form asp-action="DeleteTrainer"
+                                  method="post"
+                                  onsubmit="return confirm('Antrenör silinsin mi?');"
+                                  class="d-inline">
+
+                                @Html.AntiForgeryToken()
+
+                                <input type="hidden"
+                                       name="id"
+                                       value="@trainer.Id" />
+
+                                <button type="submit"
+                                        class="btn btn-sm btn-danger">
+                                    Sil
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <a asp-action="Index"
+       class="btn btn-secondary mt-3">
+        ← Geri Dön
+    </a>
+</div>

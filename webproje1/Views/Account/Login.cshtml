@@ -1,0 +1,47 @@
+﻿@model webproje1.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Giriş Yap";
+    Layout = "~/Views/Shared/_LayoutHomePage.cshtml";
+}
+
+<section class="auth-hero">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-7">
+                <div class="auth-card">
+                    <h3 class="auth-title text-center mb-4">Giriş Yap</h3>
+
+                    <form asp-action="Login" method="post">
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email"></label>
+                            <input asp-for="Email" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password"></label>
+                            <input asp-for="Password" type="password" class="form-control" />
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input asp-for="RememberMe" class="form-check-input" />
+                            <label asp-for="RememberMe" class="form-check-label"></label>
+                        </div>
+
+                        <button type="submit" class="btn btn-auth w-100">
+                            Giriş Yap
+                        </button>
+                    </form>
+
+                    <hr />
+                    <p class="text-center mb-0">
+                        Hesabınız yok mu?
+                        <a asp-action="Register">Üye Olun</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

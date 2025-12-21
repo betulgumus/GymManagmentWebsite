@@ -1,0 +1,101 @@
+﻿@model List<webproje1.Models.Appointment>
+
+@{
+    ViewData["Title"] = "Randevu Yönetimi";
+}
+
+<div class="container mt-5">
+    <h2>📅 Randevu Yönetimi</h2>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info mt-3">
+            Henüz randevu bulunmamaktadır.
+        </div>
+    }
+    else
+    {
+        <table class="table table-bordered table-striped mt-3 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Üye</th>
+                    <th>Antrenör</th>
+                    <th>Hizmet</th>
+                    <th>Tarih</th>
+                    <th>Saat</th>
+                    <th>Durum</th>
+                    <th style="width:160px">İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var appointment in Model)
+                {
+                    <tr>
+                        <td>
+                            @(appointment.Member?.Email ?? "-")
+                        </td>
+                        <td>
+                            @(appointment.Trainer?.User != null
+                                ? $"{appointment.Trainer.User.FirstName} {appointment.Trainer.User.LastName}"
+                                : "-")
+                        </td>
+                        <td>
+                            @(appointment.Service?.Name ?? "-")
+                        </td>
+                        <td>
+                            @appointment.AppointmentDate.ToString("dd.MM.yyyy")
+                        </td>
+                        <td>
+                            @appointment.AppointmentDate.ToString("HH:mm")
+                        </td>
+                        <td>
+                            @switch (appointment.Status)
+                            {
+                                case webproje1.Models.AppointmentStatus.Pending:
+                                    <span class="badge bg-warning text-dark">Beklemede</span>
+                                    break;
+                                case webproje1.Models.AppointmentStatus.Confirmed:
+                                    <span class="badge bg-success">Onaylandı</span>
+                                    break;
+                                case webproje1.Models.AppointmentStatus.Cancelled:
+                                    <span class="badge bg-danger">İptal</span>
+                                    break;
+                                default:
+                                    <span class="badge bg-secondary">@appointment.Status</span>
+                                    break;
+                            }
+                        </td>
+                        <td class="d-flex gap-2">
+                            @if (appointment.Status == webproje1.Models.AppointmentStatus.Pending)
+                            {
+                                <form asp-action="ApproveAppointment" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@appointment.Id" />
+                                    <button type="submit" class="btn btn-sm btn-success">
+                                        Onayla
+                                    </button>
+                                </form>
+
+                                <form asp-action="RejectAppointment" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@appointment.Id" />
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        Reddet
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <a asp-action="Index" class="btn btn-secondary mt-3">
+        ← Geri Dön
+    </a>
+</div>

@@ -1,0 +1,823 @@
+﻿@{
+    ViewData["Title"] = "Ana Sayfa";
+
+    Layout = "_LayoutHomePage";
+}
+
+<style>
+    /* ===== HERO SECTION ===== */
+    .hero-section {
+        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+                    url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1920') center/cover no-repeat;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.4) 100%);
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        color: white;
+        padding: 20px;
+    }
+
+    .hero-section h1 {
+        font-size: 4rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+        line-height: 1.2;
+    }
+
+    .hero-section .lead {
+        font-size: 1.4rem;
+        margin-bottom: 2.5rem;
+        text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .hero-buttons .btn {
+        padding: 15px 40px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        margin: 10px;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #e55a25;
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(255, 107, 53, 0.5);
+    }
+
+    .btn-outline-light:hover {
+        background-color: white;
+        color: var(--primary-color);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(255, 255, 255, 0.4);
+    }
+
+    /* ===== SERVICE CARD ===== */
+    .services-section {
+        padding: 80px 0;
+    }
+
+    .service-card {
+        border: none;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        transition: all 0.4s ease;
+        background: white;
+        height: 100%;
+    }
+
+    .service-card:hover {
+        transform: translateY(-15px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .card-img-wrapper {
+        position: relative;
+        overflow: hidden;
+        height: 250px;
+    }
+
+    .card-img-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .service-card:hover .card-img-wrapper img {
+        transform: scale(1.15);
+    }
+
+    .service-icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 70px;
+        height: 70px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: white;
+        box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+        transition: all 0.3s ease;
+    }
+
+    .service-card:hover .service-icon {
+        transform: rotate(360deg) scale(1.1);
+    }
+
+    .service-card .card-title {
+        font-size: 1.6rem;
+        font-weight: 600;
+        color: var(--secondary-color);
+        margin-bottom: 1rem;
+    }
+
+    .service-card .card-text {
+        color: var(--text-light);
+        line-height: 1.6;
+    }
+
+    .price {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .rating {
+        font-size: 0.95rem;
+    }
+
+    .rating i {
+        margin: 0 2px;
+    }
+
+    /* ===== TRAINER CARD ===== */
+    .trainers-section {
+        padding: 80px 0;
+    }
+
+    .trainer-card {
+        border: none;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        transition: all 0.4s ease;
+        background: white;
+    }
+
+    .trainer-card:hover {
+        transform: translateY(-15px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .trainer-img-wrapper {
+        position: relative;
+        overflow: hidden;
+        height: 320px;
+    }
+
+    .trainer-img-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .trainer-card:hover .trainer-img-wrapper img {
+        transform: scale(1.15);
+    }
+
+    .trainer-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.3));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .trainer-card:hover .trainer-overlay {
+        opacity: 1;
+    }
+
+    .trainer-card .card-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--secondary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .specialties .badge {
+        margin: 3px;
+        padding: 6px 12px;
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+
+    /* ===== STATS SECTION ===== */
+    .stats-section {
+        background: linear-gradient(135deg, var(--primary-color), var(--success-color));
+        color: white;
+        padding: 80px 0;
+    }
+
+    .stat-card {
+        padding: 30px 20px;
+    }
+
+    .stat-icon {
+        font-size: 3.5rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.95;
+    }
+
+    .stat-number {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 1.1rem;
+        opacity: 0.95;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    /* ===== CTA SECTION ===== */
+    .cta-section {
+        background: linear-gradient(135deg, var(--secondary-color), #1a252f);
+        padding: 80px 0;
+    }
+
+    .cta-section h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @@media (max-width: 992px) {
+        .hero-section h1 {
+            font-size: 3rem;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .hero-section h1 {
+            font-size: 2.5rem;
+        }
+
+        .hero-section .lead {
+            font-size: 1.1rem;
+        }
+
+        .hero-buttons .btn {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .hero-section h1 {
+            font-size: 2rem;
+        }
+
+        .hero-section .lead {
+            font-size: 1rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+        }
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-content">
+        <h1 data-aos="fade-up">Hayalinizdeki Vücuda Ulaşın</h1>
+        <p class="lead" data-aos="fade-up" data-aos-delay="100">
+            Profesyonel antrenörlerimiz ve modern ekipmanlarımızla fitness hedeflerinize ulaşın
+        </p>
+        <div class="hero-buttons" data-aos="fade-up" data-aos-delay="200">
+            <a href="@Url.Action("Register", "Account")" class="btn btn-primary btn-lg">
+                <i class="fas fa-user-plus"></i> Üye Ol
+            </a>
+            <a href="@Url.Action("Login", "Account")" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-sign-in-alt"></i> Giriş Yap
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Hizmetlerimiz Section -->
+<section class="services-section">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="section-title">Hizmetlerimiz</h2>
+            <p class="text-muted">Size en uygun programı seçin ve başlayın</p>
+            <div class="alert alert-info mt-3">
+                <i class="fas fa-info-circle"></i> Randevu almak için üye girişi yapmalısınız
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Fitness Card -->
+            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="service-card card h-100 shadow-sm">
+                    <div class="card-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800" class="card-img-top" alt="Fitness">
+                        <div class="service-icon">
+                            <i class="fas fa-dumbbell"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Fitness</h5>
+                        <p class="card-text">Profesyonel antrenörler eşliğinde kişiselleştirilmiş fitness programları</p>
+                        <div class="service-details">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span><i class="fas fa-clock"></i> 60 dakika</span>
+                                <span class="price">250₺</span>
+                            </div>
+                            <div class="rating mb-3">
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <span class="ms-2">(4.9)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="@Url.Action("Details", "Services", new { id = 1 })" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-info-circle"></i> Detayları Gör
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yoga Card -->
+            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="service-card card h-100 shadow-sm">
+                    <div class="card-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800" class="card-img-top" alt="Yoga">
+                        <div class="service-icon">
+                            <i class="fas fa-spa"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Yoga</h5>
+                        <p class="card-text">Beden ve zihin dengenizi yoga ile yakalayın</p>
+                        <div class="service-details">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span><i class="fas fa-clock"></i> 45 dakika</span>
+                                <span class="price">200₺</span>
+                            </div>
+                            <div class="rating mb-3">
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <span class="ms-2">(4.8)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="@Url.Action("Details", "Services", new { id = 2 })" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-info-circle"></i> Detayları Gör
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pilates Card -->
+            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="service-card card h-100 shadow-sm">
+                    <div class="card-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800" class="card-img-top" alt="Pilates">
+                        <div class="service-icon">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Pilates</h5>
+                        <p class="card-text">Esneklik ve kas gücü kazanmak için pilates</p>
+                        <div class="service-details">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span><i class="fas fa-clock"></i> 60 dakika</span>
+                                <span class="price">220₺</span>
+                            </div>
+                            <div class="rating mb-3">
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star-half-alt text-warning"></i>
+                                <span class="ms-2">(4.7)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="@Url.Action("Details", "Services", new { id = 3 })" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-info-circle"></i> Detayları Gör
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Training Card -->
+            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="400">
+                <div class="service-card card h-100 shadow-sm">
+                    <div class="card-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1549060279-7e168fcee0c2?w=800" class="card-img-top" alt="Personal Training">
+                        <div class="service-icon">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Personal Training</h5>    
+                        <p class="card-text">Birebir özel antrenman programı</p>
+                        <div class="service-details">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span><i class="fas fa-clock"></i> 45 dakika</span>
+                                <span class="price">350₺</span>
+                            </div>
+                            <div class="rating mb-3">
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <span class="ms-2">(5.0)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="@Url.Action("Details", "Services", new { id = 4 })" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-info-circle"></i> Detayları Gör
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zumba Card -->
+            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="500">
+                <div class="service-card card h-100 shadow-sm">
+                    <div class="card-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=800" class="card-img-top" alt="Zumba">
+                        <div class="service-icon">
+                            <i class="fas fa-music"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Zumba</h5>
+                        <p class="card-text">Eğlenceli müzik eşliğinde dans ve egzersiz</p>
+                        <div class="service-details">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span><i class="fas fa-clock"></i> 50 dakika</span>
+                                <span class="price">180₺</span>
+                            </div>
+                            <div class="rating mb-3">
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <span class="ms-2">(4.9)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="@Url.Action("Details", "Services", new { id = 5 })" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-info-circle"></i> Detayları Gör
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CrossFit Card -->
+            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="600">
+                <div class="service-card card h-100 shadow-sm">
+                    <div class="card-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800" class="card-img-top" alt="CrossFit">
+                        <div class="service-icon">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">CrossFit</h5>
+                        <p class="card-text">Yüksek yoğunluklu fonksiyonel antrenman</p>
+                        <div class="service-details">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span><i class="fas fa-clock"></i> 60 dakika</span>
+                                <span class="price">280₺</span>
+                            </div>
+                            <div class="rating mb-3">
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star-half-alt text-warning"></i>
+                                <span class="ms-2">(4.6)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="@Url.Action("Details", "Services", new { id = 6 })" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-info-circle"></i> Detayları Gör
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Antrenörler Section -->
+<section class="trainers-section bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="section-title">Uzman Kadromuz</h2>
+            <p class="text-muted">Deneyimli ve sertifikalı antrenörlerimizle tanışın</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Antrenör 1 -->
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
+                <div class="trainer-card card h-100 shadow-sm">
+                    <div class="trainer-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1567013127542-490d757e51fc?w=800" class="card-img-top" alt="Ahmet Yılmaz">
+                        <div class="trainer-overlay">
+                            <a href="@Url.Action("Profile", "Trainers", new { id = 1 })" class="btn btn-light btn-sm">
+                                <i class="fas fa-eye"></i> Profili Gör
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Ahmet Yılmaz</h5>
+                        <p class="text-muted mb-2">Fitness Uzmanı</p>
+                        <div class="specialties mb-3">
+                            <span class="badge bg-primary">Kilo Verme</span>
+                            <span class="badge bg-primary">Kas Geliştirme</span>
+                        </div>
+                        <div class="rating">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <span class="ms-2">(4.9)</span>
+                        </div>
+                        <p class="text-muted small mt-2">
+                            <i class="fas fa-briefcase"></i> 8 yıl deneyim
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Antrenör 2 -->
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
+                <div class="trainer-card card h-100 shadow-sm">
+                    <div class="trainer-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1594381898411-846e7d193883?w=800" class="card-img-top" alt="Ayşe Kaya">
+                        <div class="trainer-overlay">
+                            <a href="@Url.Action("Profile", "Trainers", new { id = 2 })" class="btn btn-light btn-sm">
+                                <i class="fas fa-eye"></i> Profili Gör
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Ayşe Kaya</h5>
+                        <p class="text-muted mb-2">Yoga Eğitmeni</p>
+                        <div class="specialties mb-3">
+                            <span class="badge bg-success">Yoga</span>
+                            <span class="badge bg-success">Meditasyon</span>
+                        </div>
+                        <div class="rating">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <span class="ms-2">(5.0)</span>
+                        </div>
+                        <p class="text-muted small mt-2">
+                            <i class="fas fa-briefcase"></i> 6 yıl deneyim
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Antrenör 3 -->
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
+                <div class="trainer-card card h-100 shadow-sm">
+                    <div class="trainer-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=800" class="card-img-top" alt="Mehmet Demir">
+                        <div class="trainer-overlay">
+                            <a href="@Url.Action("Profile", "Trainers", new { id = 3 })" class="btn btn-light btn-sm">
+                                <i class="fas fa-eye"></i> Profili Gör
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Mehmet Demir</h5>
+                        <p class="text-muted mb-2">Pilates Uzmanı</p>
+                        <div class="specialties mb-3">
+                            <span class="badge bg-info">Pilates</span>
+                            <span class="badge bg-info">Esneklik</span>
+                        </div>
+                        <div class="rating">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <span class="ms-2">(4.8)</span>
+                        </div>
+                        <p class="text-muted small mt-2">
+                            <i class="fas fa-briefcase"></i> 5 yıl deneyim
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Antrenör 4 -->
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="400">
+                <div class="trainer-card card h-100 shadow-sm">
+                    <div class="trainer-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800" class="card-img-top" alt="Zeynep Şahin">
+                        <div class="trainer-overlay">
+                            <a href="@Url.Action("Profile", "Trainers", new { id = 4 })" class="btn btn-light btn-sm">
+                                <i class="fas fa-eye"></i> Profili Gör
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Zeynep Şahin</h5>
+                        <p class="text-muted mb-2">CrossFit Eğitmeni</p>
+                        <div class="specialties mb-3">
+                            <span class="badge bg-danger">CrossFit</span>
+                            <span class="badge bg-danger">HIIT</span>
+                        </div>
+                        <div class="rating">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star-half-alt text-warning"></i>
+                            <span class="ms-2">(4.7)</span>
+                        </div>
+                        <p class="text-muted small mt-2">
+                            <i class="fas fa-briefcase"></i> 7 yıl deneyim
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            <a href="@Url.Action("Index", "Trainers")" class="btn btn-primary btn-lg">
+                <i class="fas fa-users"></i> Tüm Antrenörleri Gör
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- İstatistikler Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-6 col-md-3 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="stat-number"><span class="counter" data-target="500">0</span>+</h3>
+                    <p class="stat-label">Aktif Üye</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <h3 class="stat-number"><span class="counter" data-target="15">0</span></h3>
+                    <p class="stat-label">Uzman Antrenör</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h3 class="stat-number"><span class="counter" data-target="1000">0</span>+</h3>
+                    <p class="stat-label">Tamamlanan Randevu</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-4" data-aos="fade-up" data-aos-delay="400">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-smile"></i>
+                    </div>
+                    <h3 class="stat-number">%<span class="counter" data-target="98">0</span></h3>
+                    <p class="stat-label">Memnuniyet</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section text-white">
+    <div class="container text-center" data-aos="fade-up">
+        <h2 class="mb-4">Hayalinizdeki Vücuda Bugün Başlayın!</h2>
+        <p class="lead mb-4">Ücretsiz üye olun ve fitness yolculuğunuza başlayın</p>
+        <a asp-controller="Home" asp-action="Registretion" class="btn btn-light btn-lg">
+            <i  class="fas fa-rocket"></i> Hemen Üye Ol
+        </a>
+    </div>
+</section>
+
+<!-- HİZMETLER bu kısımda o saçma logo çıkıyordu onu kaldırdım.....................-->
+@* <section class="services-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Hizmetlerimiz</h2>
+            <p class="section-subtitle">
+                Size en uygun spor deneyimini sunuyoruz
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Fitness -->
+            <div class="col-md-6 col-lg-3">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fa-solid fa-dumbbell"></i>
+                    </div>
+                    <h5>Fitness</h5>
+                    <p>Kas geliştirme ve kondisyon çalışmaları</p>
+                </div>
+            </div>
+
+            <!-- Yoga -->
+            <div class="col-md-6 col-lg-3">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fa-solid fa-spa"></i>
+                    </div>
+                    <h5>Yoga</h5>
+                    <p>Esneklik, denge ve zihinsel rahatlama</p>
+                </div>
+            </div>
+
+            <!-- Pilates -->
+            <div class="col-md-6 col-lg-3">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fa-solid fa-person-walking"></i>
+                    </div>
+                    <h5>Pilates</h5>
+                    <p>Postür ve core güçlendirme</p>
+                </div>
+            </div> 
+
+            <!-- Personal Training -->
+            <div class="col-md-6 col-lg-3">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <h5>Personal Training</h5>
+                    <p>Birebir özel antrenman programları</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section> *@
