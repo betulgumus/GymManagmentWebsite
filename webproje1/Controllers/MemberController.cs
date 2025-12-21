@@ -4,10 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webproje1.Data;
 using webproje1.Models;
+using webproje1.ViewModels;
 
 namespace webproje1.Controllers
 {
-    [Authorize(Roles = "Member")]
+    [Authorize]
     public class MemberController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -45,7 +46,6 @@ namespace webproje1.Controllers
         // ============================
         // 1️⃣ HİZMET SEÇ
         // ============================
-        [HttpGet]
         public async Task<IActionResult> SelectService()
         {
             var services = await _context.Services
@@ -79,8 +79,9 @@ namespace webproje1.Controllers
             var trainers = await _context.Trainers
                 .Include(t => t.User)
                 .Include(t => t.TrainerServices)
-                .Where(t => t.IsAvailable &&
-                            t.TrainerServices.Any(ts => ts.ServiceId == serviceId))
+                .Where(t =>
+                    t.IsAvailable &&
+                    t.TrainerServices.Any(ts => ts.ServiceId == serviceId))
                 .OrderBy(t => t.User.FirstName)
                 .ToListAsync();
 
@@ -94,6 +95,12 @@ namespace webproje1.Controllers
         [HttpGet]
         public async Task<IActionResult> SelectDateTime(int trainerId, int serviceId)
         {
+            var service = await _context.Services
+                .FirstOrDefaultAsync(s => s.Id == serviceId && s.IsActive);
+
+            if (service == null)
+                return RedirectToAction(nameof(SelectService));
+
             var availabilities = await _context.TrainerAvailabilities
                 .Where(a =>
                     a.TrainerId == trainerId &&
@@ -103,10 +110,50 @@ namespace webproje1.Controllers
                 .ThenBy(a => a.StartTime)
                 .ToListAsync();
 
+            var existingAppointments = await _context.Appointments
+                .Where(a =>
+                    a.TrainerId == trainerId &&
+                    a.AppointmentDate.Date >= DateTime.Today &&
+                    a.Status != AppointmentStatus.Cancelled)
+                .ToListAsync();
+
+            var duration = TimeSpan.FromMinutes(service.DurationMinutes);
+            var slots = new List<TimeSlotViewModel>();
+
+            foreach (var availability in availabilities)
+            {
+                var start = availability.StartTime;
+                var latestStart = availability.EndTime - duration;
+
+                while (start <= latestStart)
+                {
+                    var end = start + duration;
+
+                    var overlap = existingAppointments.Any(a =>
+                        a.AppointmentDate.Date == availability.AvailableDate.Date &&
+                        start < a.EndTime &&
+                        end > a.StartTime);
+
+                    if (!overlap)
+                    {
+                        slots.Add(new TimeSlotViewModel
+                        {
+                            TrainerId = trainerId,
+                            ServiceId = serviceId,
+                            Date = availability.AvailableDate.Date,
+                            StartTime = start,
+                            EndTime = end
+                        });
+                    }
+
+                    start = start.Add(duration);
+                }
+            }
+
             ViewBag.TrainerId = trainerId;
             ViewBag.ServiceId = serviceId;
 
-            return View("SelectDateTime", availabilities);
+            return View("SelectDateTime", slots);
         }
 
         // ============================
@@ -124,27 +171,41 @@ namespace webproje1.Controllers
             if (user == null)
                 return RedirectToAction("Login", "Account");
 
-            var trainer = await _context.Trainers
-                .FirstOrDefaultAsync(t => t.Id == trainerId);
-
-            if (trainer == null)
-                return RedirectToAction(nameof(SelectTrainer), new { serviceId });
-
             var service = await _context.Services
                 .FirstOrDefaultAsync(s => s.Id == serviceId && s.IsActive);
 
             if (service == null)
                 return RedirectToAction(nameof(SelectService));
 
+            var duration = TimeSpan.FromMinutes(service.DurationMinutes);
+            var endTime = startTime.Add(duration);
+
             var availability = await _context.TrainerAvailabilities
                 .FirstOrDefaultAsync(a =>
                     a.TrainerId == trainerId &&
                     a.AvailableDate.Date == availableDate.Date &&
-                    a.StartTime == startTime &&
-                    a.IsActive);
+                    a.IsActive &&
+                    startTime >= a.StartTime &&
+                    endTime <= a.EndTime);
 
-            var endTime = availability?.EndTime
-                ?? startTime.Add(TimeSpan.FromMinutes(service.DurationMinutes));
+            if (availability == null)
+            {
+                TempData["Error"] = "Seçilen saat için müsaitlik yok.";
+                return RedirectToAction(nameof(SelectDateTime), new { trainerId, serviceId });
+            }
+
+            var hasOverlap = await _context.Appointments.AnyAsync(a =>
+                a.TrainerId == trainerId &&
+                a.AppointmentDate.Date == availableDate.Date &&
+                a.Status != AppointmentStatus.Cancelled &&
+                startTime < a.EndTime &&
+                endTime > a.StartTime);
+
+            if (hasOverlap)
+            {
+                TempData["Error"] = "Bu saat için randevu mevcut.";
+                return RedirectToAction(nameof(SelectDateTime), new { trainerId, serviceId });
+            }
 
             var appointment = new Appointment
             {
@@ -163,7 +224,7 @@ namespace webproje1.Controllers
             _context.Appointments.Add(appointment);
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = "✅ Randevu talebiniz oluşturuldu!";
+            TempData["Success"] = "✅ Randevu başarıyla oluşturuldu.";
             return RedirectToAction(nameof(MyAppointments));
         }
 

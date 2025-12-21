@@ -11,23 +11,16 @@
     @if (Model == null || !Model.Any())
     {
         <div class="alert alert-warning">
-            <p>Şu anda aktif hizmet bulunmamaktadır.</p>
-            <a asp-action="Index" class="btn btn-secondary">
-                ← Geri
-            </a>
+            Şu anda aktif hizmet bulunmamaktadır.
         </div>
     }
     else
     {
         <form asp-action="SelectTrainer" method="get">
             <div class="mb-3">
-                <label class="form-label">
-                    <strong>Hizmet</strong>
-                </label>
-
+                <label class="form-label"><strong>Hizmet</strong></label>
                 <select name="serviceId" class="form-select" required>
                     <option value="">-- Hizmet Seçin --</option>
-
                     @foreach (var service in Model)
                     {
                         <option value="@service.Id">

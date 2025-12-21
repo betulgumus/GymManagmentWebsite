@@ -1,4 +1,4 @@
-﻿@model List<webproje1.Models.TrainerAvailability>
+﻿@model List<webproje1.ViewModels.TimeSlotViewModel>
 
 @{
     ViewData["Title"] = "Tarih & Saat Seç";
@@ -10,10 +10,19 @@
     <h2>📅 Tarih & Saat Seç</h2>
     <hr />
 
+    @* Hata mesajı *@
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
     @if (Model == null || !Model.Any())
     {
         <div class="alert alert-warning">
-            <p>Bu antrenör için ileri tarihli müsaitlik bulunmamaktadır.</p>
+            <p>Bu antrenör için ileri tarihli müsait saat bulunmamaktadır.</p>
             <a asp-action="SelectTrainer"
                asp-route-serviceId="@serviceId"
                class="btn btn-secondary">
@@ -30,7 +39,7 @@
                     <div class="card shadow-sm">
                         <div class="card-body text-center">
                             <h5 class="card-title">
-                                📆 @item.AvailableDate.ToString("dd.MM.yyyy")
+                                📆 @item.Date.ToString("dd.MM.yyyy")
                             </h5>
 
                             <p class="text-muted">
@@ -42,9 +51,9 @@
                             <form asp-action="CreateAppointment" method="post">
                                 @Html.AntiForgeryToken()
 
-                                <input type="hidden" name="trainerId" value="@trainerId" />
-                                <input type="hidden" name="serviceId" value="@serviceId" />
-                                <input type="hidden" name="availableDate" value="@item.AvailableDate.ToString("yyyy-MM-dd")" />
+                                <input type="hidden" name="trainerId" value="@item.TrainerId" />
+                                <input type="hidden" name="serviceId" value="@item.ServiceId" />
+                                <input type="hidden" name="availableDate" value="@item.Date.ToString("yyyy-MM-dd")" />
                                 <input type="hidden" name="startTime" value="@item.StartTime" />
 
                                 <button type="submit" class="btn btn-success">
