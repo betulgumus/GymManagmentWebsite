@@ -4,8 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webproje1.Data;
 using webproje1.Models;
-using webproje1.Services;
-using webproje1.ViewModels;
 
 namespace webproje1.Controllers
 {
@@ -14,16 +12,13 @@ namespace webproje1.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly GroqChatService _groqChatService;
 
         public MemberController(
             ApplicationDbContext context,
-            UserManager<ApplicationUser> userManager,
-            GroqChatService groqChatService)
+            UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;
-            _groqChatService = groqChatService;
         }
 
         // ============================
@@ -32,7 +27,8 @@ namespace webproje1.Controllers
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null) return RedirectToAction("Login", "Account");
+            if (user == null)
+                return RedirectToAction("Login", "Account");
 
             var profile = await _context.MemberProfiles
                 .FirstOrDefaultAsync(m => m.UserId == user.Id);
@@ -49,6 +45,7 @@ namespace webproje1.Controllers
         // ============================
         // 1️⃣ HİZMET SEÇ
         // ============================
+        [HttpGet]
         public async Task<IActionResult> SelectService()
         {
             var services = await _context.Services
@@ -60,30 +57,105 @@ namespace webproje1.Controllers
         }
 
         // ============================
+        // RANDEVU AL (HİZMET SEÇ)
+        // ============================
+        [HttpGet]
+        public async Task<IActionResult> BookAppointment()
+        {
+            var services = await _context.Services
+                .Where(s => s.IsActive)
+                .OrderBy(s => s.Name)
+                .ToListAsync();
+
+            return View("BookAppointment", services);
+        }
+
+        // ============================
+        // 2️⃣ ANTRENÖR SEÇ
+        // ============================
+        [HttpGet]
+        public async Task<IActionResult> SelectTrainer(int serviceId)
+        {
+            var trainers = await _context.Trainers
+                .Include(t => t.User)
+                .Include(t => t.TrainerServices)
+                .Where(t => t.IsAvailable &&
+                            t.TrainerServices.Any(ts => ts.ServiceId == serviceId))
+                .OrderBy(t => t.User.FirstName)
+                .ToListAsync();
+
+            ViewBag.ServiceId = serviceId;
+            return View("SelectTrainer", trainers);
+        }
+
+        // ============================
+        // 3️⃣ TARİH & SAAT SEÇ
+        // ============================
+        [HttpGet]
+        public async Task<IActionResult> SelectDateTime(int trainerId, int serviceId)
+        {
+            var availabilities = await _context.TrainerAvailabilities
+                .Where(a =>
+                    a.TrainerId == trainerId &&
+                    a.IsActive &&
+                    a.AvailableDate.Date >= DateTime.Today)
+                .OrderBy(a => a.AvailableDate)
+                .ThenBy(a => a.StartTime)
+                .ToListAsync();
+
+            ViewBag.TrainerId = trainerId;
+            ViewBag.ServiceId = serviceId;
+
+            return View("SelectDateTime", availabilities);
+        }
+
+        // ============================
         // RANDEVU OLUŞTUR
         // ============================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateAppointment(int serviceId, int trainerId, DateTime appointmentDate)
+        public async Task<IActionResult> CreateAppointment(
+            int serviceId,
+            int trainerId,
+            DateTime availableDate,
+            TimeSpan startTime)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
                 return RedirectToAction("Login", "Account");
 
-            var gym = await _context.GymCenters.FirstOrDefaultAsync();
-            if (gym == null)
-            {
-                ModelState.AddModelError(string.Empty, "Spor salonu bulunamadı.");
+            var trainer = await _context.Trainers
+                .FirstOrDefaultAsync(t => t.Id == trainerId);
+
+            if (trainer == null)
+                return RedirectToAction(nameof(SelectTrainer), new { serviceId });
+
+            var service = await _context.Services
+                .FirstOrDefaultAsync(s => s.Id == serviceId && s.IsActive);
+
+            if (service == null)
                 return RedirectToAction(nameof(SelectService));
-            }
+
+            var availability = await _context.TrainerAvailabilities
+                .FirstOrDefaultAsync(a =>
+                    a.TrainerId == trainerId &&
+                    a.AvailableDate.Date == availableDate.Date &&
+                    a.StartTime == startTime &&
+                    a.IsActive);
+
+            var endTime = availability?.EndTime
+                ?? startTime.Add(TimeSpan.FromMinutes(service.DurationMinutes));
 
             var appointment = new Appointment
             {
                 MemberId = user.Id,
                 TrainerId = trainerId,
                 ServiceId = serviceId,
-                GymCenterId = gym.Id,
-                AppointmentDate = appointmentDate,
+                GymCenterId = service.GymCenterId,
+                AppointmentDate = availableDate.Date,
+                StartTime = startTime,
+                EndTime = endTime,
+                TotalPrice = service.Price,
                 Status = AppointmentStatus.Pending,
                 CreatedDate = DateTime.Now
             };
@@ -113,153 +185,7 @@ namespace webproje1.Controllers
                 .OrderByDescending(a => a.AppointmentDate)
                 .ToListAsync();
 
-            return View("MyAppointments", appointments);
-        }
-
-        // ============================
-        // ANTRENÖRLER
-        // ============================
-        public async Task<IActionResult> Trainers()
-        {
-            var trainers = await _context.Trainers
-                .Include(t => t.User)
-                .Include(t => t.TrainerServices)
-                    .ThenInclude(ts => ts.Service)
-                .Where(t => t.IsAvailable)
-                .ToListAsync();
-
-            return View("Trainers", trainers);
-        }
-
-        // ============================
-        // HİZMETLER
-        // ============================
-        public async Task<IActionResult> Services()
-        {
-            var services = await _context.Services
-                .Where(s => s.IsActive)
-                .OrderBy(s => s.Name)
-                .ToListAsync();
-
-            return View("Services", services);
-        }
-
-        // ============================
-        // 🤖 AI ÖNERİLERİ
-        // ============================
-        public async Task<IActionResult> AiRecommendations()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-                return RedirectToAction("Login", "Account");
-
-            var history = await _context.AIRecommendations
-                .Where(r => r.MemberId == user.Id)
-                .OrderByDescending(r => r.RequestDate)
-                .Take(5)
-                .ToListAsync();
-
-            var model = new AIRecommendationViewModel
-            {
-                History = history
-            };
-
-            return View("AiRecommendations", model);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AiRecommendations(
-            AIRecommendationViewModel model,
-            CancellationToken cancellationToken)
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-                return RedirectToAction("Login", "Account");
-
-            if (!ModelState.IsValid)
-            {
-                model.History = await _context.AIRecommendations
-                    .Where(r => r.MemberId == user.Id)
-                    .OrderByDescending(r => r.RequestDate)
-                    .Take(5)
-                    .ToListAsync();
-
-                return View("AiRecommendations", model);
-            }
-
-            string response;
-            var prompt = $"Soru: {model.Question}\nİstek Türü: {model.RequestType}";
-
-            try
-            {
-                response = await _groqChatService
-                    .GetRecommendationAsync(prompt, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError(string.Empty,
-                    $"AI servisine ulaşılamadı: {ex.Message}");
-
-                model.History = await _context.AIRecommendations
-                    .Where(r => r.MemberId == user.Id)
-                    .OrderByDescending(r => r.RequestDate)
-                    .Take(5)
-                    .ToListAsync();
-
-                return View("AiRecommendations", model);
-            }
-
-            var aiRecord = new AIRecommendation
-            {
-                MemberId = user.Id,
-                RequestType = model.RequestType,
-                InputData = model.Question,
-                AIResponse = response,
-                RequestDate = DateTime.Now
-            };
-
-            _context.AIRecommendations.Add(aiRecord);
-            await _context.SaveChangesAsync();
-
-            model.Response = response;
-            model.History = await _context.AIRecommendations
-                .Where(r => r.MemberId == user.Id)
-                .OrderByDescending(r => r.RequestDate)
-                .Take(5)
-                .ToListAsync();
-
-            return View("AiRecommendations", model);
-        }
-
-        // ============================
-        // PROFİL
-        // ============================
-        public async Task<IActionResult> Profile()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-                return RedirectToAction("Login", "Account");
-
-            var profile = await _context.MemberProfiles
-                .FirstOrDefaultAsync(m => m.UserId == user.Id);
-
-            return View("Profile", profile);
-        }
-
-        // ============================
-        // PROFİL DÜZENLE
-        // ============================
-        public async Task<IActionResult> EditProfile()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-                return RedirectToAction("Login", "Account");
-
-            var profile = await _context.MemberProfiles
-                .FirstOrDefaultAsync(m => m.UserId == user.Id);
-
-            return View("EditProfile", profile);
+            return View(appointments);
         }
     }
 }
