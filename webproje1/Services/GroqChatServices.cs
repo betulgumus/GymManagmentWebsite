@@ -19,51 +19,87 @@ namespace webproje1.Services
             _options = options.Value;
 
             if (string.IsNullOrWhiteSpace(_options.ApiKey))
-                throw new Exception("Groq API KEY BOŞ GELİYOR!");
+                throw new InvalidOperationException(
+                    "Groq API Key bulunamadı. User Secrets kontrol et.");
         }
 
-        public async Task<string> AskAsync(string prompt)
+        public Task<string> AskAsync(string prompt)
         {
-            var requestBody = new
+            return SendRequestAsync(prompt, CancellationToken.None);
+        }
+
+        public Task<string> GetRecommendationAsync(
+            string prompt,
+            CancellationToken cancellationToken)
+        {
+            return SendRequestAsync(prompt, cancellationToken);
+        }
+
+        private async Task<string> SendRequestAsync(
+            string prompt,
+            CancellationToken cancellationToken)
+        {
+            try
             {
-                model = _options.Model,
-                messages = new[]
+                var requestBody = new
                 {
-                    new { role = "user", content = prompt }
+                    model = _options.Model,
+                    messages = new[]
+                    {
+                        new
+                        {
+                            role = "system",
+                            content = "Sen bir fitness danışmanısın. Yanıtlarını Türkçe, kısa ve net ver."
+                        },
+                        new
+                        {
+                            role = "user",
+                            content = prompt
+                        }
+                    },
+                    temperature = 0.7,
+                    max_tokens = 1000
+                };
+
+                var request = new HttpRequestMessage(HttpMethod.Post, _options.BaseUrl);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _options.ApiKey);
+
+                var jsonBody = JsonSerializer.Serialize(requestBody);
+                Console.WriteLine($"[GROQ] Request Body: {jsonBody}");
+
+                request.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.SendAsync(request, cancellationToken);
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                Console.WriteLine($"[GROQ] Status: {response.StatusCode}");
+                Console.WriteLine($"[GROQ] Response: {responseBody}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Groq API Error {response.StatusCode}: {responseBody}");
                 }
-            };
 
-            var request = new HttpRequestMessage(
-                HttpMethod.Post,
-                _options.BaseUrl);
+                using var doc = JsonDocument.Parse(responseBody);
 
-            request.Headers.Authorization =
-                new AuthenticationHeaderValue(
-                    "Bearer", _options.ApiKey);
+                if (!doc.RootElement.TryGetProperty("choices", out var choices) ||
+                    choices.GetArrayLength() == 0)
+                {
+                    throw new InvalidOperationException($"Empty response: {responseBody}");
+                }
 
-            request.Content = new StringContent(
-                JsonSerializer.Serialize(requestBody),
-                Encoding.UTF8,
-                "application/json");
+                var content = choices[0]
+                    .GetProperty("message")
+                    .GetProperty("content")
+                    .GetString();
 
-            var response = await _httpClient.SendAsync(request);
-            var json = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-                throw new Exception(json);
-
-            using var doc = JsonDocument.Parse(json);
-
-            return doc.RootElement
-                .GetProperty("choices")[0]
-                .GetProperty("message")
-                .GetProperty("content")
-                .GetString()!;
-        }
-
-        internal async Task<string> GetRecommendationAsync(string prompt, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
+                return content?.Trim() ?? "Yanıt alınamadı";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GROQ ERROR] {ex.Message}");
+                throw;
+            }
         }
     }
 }
